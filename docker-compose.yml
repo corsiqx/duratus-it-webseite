@@ -1,0 +1,21 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./duratus-it-frontend/Dockerfile
+      args:
+        c: production
+    container_name: duratus-it-frontend
+    ports:
+      - "127.0.0.1:11001:80"
+    restart: always
+    networks:
+      - duratus-it-frontend_network
+
+volumes:
+  duratus-it-frontend-postgres-data:
+    driver: local
+
+networks:
+  duratus-it-frontend_network:
+    driver: bridge

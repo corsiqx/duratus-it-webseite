@@ -1,0 +1,160 @@
+<app-page-hero
+  crumb="OpenDesk"
+  title="Digitale Souveränität"
+  highlight="für Verwaltung und Kommune."
+  lead="OpenDesk ist die sichere Office-Suite für Stadtverwaltungen, Kommunen und Behörden: Open Source, DSGVO-konform und wahlweise on-premise oder in einem deutschen Rechenzentrum betrieben. Duratus IT ist offizieller Partner und übernimmt Einführung und Betrieb als Managed Service."
+>
+  <span
+    class="mt-10 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15"
+  >
+    <ng-icon name="phosphorSealCheck" size="18" class="text-primary-on-night" />
+    Offizieller OpenDesk-Partner
+  </span>
+</app-page-hero>
+
+<!-- Intro -->
+<section class="bg-canvas py-16 sm:py-24 lg:py-28" aria-labelledby="intro-title">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:gap-14 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
+    <div appReveal class="lg:col-span-6">
+      <h2 id="intro-title" class="text-[2rem] leading-[1.12] sm:text-4xl sm:leading-[1.1] font-bold tracking-tight text-balance text-ink md:text-5xl">
+        Eine Office-Suite, die im Haus bleibt.
+      </h2>
+      <p class="mt-6 text-lg leading-relaxed text-muted">
+        OpenDesk bündelt Mail, Chat, Videokonferenz, Dateiablage, Dokumente, Projektmanagement und Wissensmanagement in
+        einer Anwendung, entwickelt für die öffentliche Verwaltung. Ohne Abhängigkeit von außereuropäischen
+        Cloud-Anbietern und mit voller Kontrolle über die eigenen Daten.
+      </p>
+      <p class="mt-4 leading-relaxed text-muted">
+        Als offizieller OpenDesk-Partner übernehmen wir für Sie Einrichtung, Migration und laufenden Betrieb. Sie
+        nutzen die Anwendung, wir kümmern uns um Updates, Monitoring und Sicherheit.
+      </p>
+    </div>
+    <ul class="flex flex-col gap-4 lg:col-span-6">
+      @for (point of ['Open Source statt Anbieterbindung', 'DSGVO-konform und wahlweise on-premise betrieben', 'Entwickelt für die Anforderungen von Kommunen und Behörden', 'Einführung, Migration und Betrieb aus einer Hand']; track point; let i = $index) {
+        <li appReveal [revealDelay]="i" class="flex gap-4 rounded-2xl border border-line bg-canvas-alt p-5">
+          <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+            <ng-icon name="phosphorCheckCircle" size="20" />
+          </span>
+          <p class="self-center font-semibold text-ink">{{ point }}</p>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Funktionen -->
+<section class="border-y border-line bg-canvas-alt py-16 sm:py-24 lg:py-28" aria-labelledby="features-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div appReveal class="max-w-2xl">
+      <h2 id="features-title" class="text-[2rem] leading-[1.12] sm:text-4xl sm:leading-[1.1] font-bold tracking-tight text-balance text-ink md:text-5xl">
+        Alle Funktionen im Überblick.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-muted">Acht Anwendungen, eine gemeinsame Anmeldung.</p>
+    </div>
+
+    <ul class="mt-10 sm:mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (feature of features; track feature.title; let i = $index) {
+        <li appReveal [revealDelay]="i % 5" class="flex gap-4 rounded-2xl border border-line bg-canvas p-5 sm:flex-col sm:gap-0 sm:p-6">
+          <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary sm:size-12">
+            <ng-icon [name]="feature.icon" size="24" />
+          </span>
+          <div>
+            <h3 class="font-bold text-ink sm:mt-5">{{ feature.title }}</h3>
+            <p class="mt-1.5 text-[15px] leading-relaxed text-muted sm:mt-2">{{ feature.text }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Pakete -->
+<section class="bg-canvas py-16 sm:py-24 lg:py-28" aria-labelledby="packages-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
+      <div appReveal class="max-w-2xl">
+        <h2 id="packages-title" class="text-[2rem] leading-[1.12] sm:text-4xl sm:leading-[1.1] font-bold tracking-tight text-balance text-ink md:text-5xl">
+          OpenDesk als Managed Service.
+        </h2>
+        <p class="mt-5 text-lg leading-relaxed text-muted">
+          Drei Paketstufen, monatlich abgerechnet. Wir empfehlen Ihnen anhand Ihrer Behördengröße die passende Stufe.
+        </p>
+      </div>
+      <span appReveal class="self-start rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary md:self-auto">
+        Monatlich abgerechnet
+      </span>
+    </div>
+
+    <ul class="mt-10 sm:mt-14 grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+      @for (pkg of packages; track pkg.name; let pi = $index) {
+        <li
+          appReveal
+          [revealDelay]="pi + 1"
+          class="relative flex flex-col rounded-2xl p-6 sm:p-7"
+          [class]="pi === 1 ? 'bg-canvas shadow-lg shadow-slate-900/10 ring-2 ring-primary' : 'bg-canvas ring-1 ring-line'"
+        >
+          @if (pi === 1) {
+            <span class="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white sm:left-7">
+              Häufig gewählt
+            </span>
+          }
+          <p class="text-sm font-semibold text-primary">{{ pkg.audience }}</p>
+          <h3 class="mt-1 text-2xl font-bold tracking-tight text-ink">{{ pkg.name }}</h3>
+          <ul class="mt-6 flex flex-1 flex-col gap-3 text-[15px]">
+            @for (feature of pkg.features; track feature) {
+              <li class="flex gap-3 text-ink">
+                <ng-icon name="phosphorCheckCircle" size="20" class="mt-px shrink-0 text-primary" />
+                {{ feature }}
+              </li>
+            }
+          </ul>
+          <p class="mt-6 border-t border-line pt-4 text-sm text-muted">
+            <span class="font-semibold text-ink">Support:</span> {{ pkg.support }}
+          </p>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Vorstellungstermin -->
+<section class="bg-canvas py-12 sm:py-20 lg:py-24" aria-labelledby="termin-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div
+      appReveal
+      class="relative isolate flex flex-col gap-7 overflow-hidden rounded-2xl bg-primary px-6 py-10 sm:px-12 sm:py-12 lg:flex-row lg:items-center lg:justify-between lg:py-14"
+    >
+      <div
+        class="pointer-events-none absolute -right-24 -bottom-40 -z-10 size-96 rounded-full border-[48px] border-white/10"
+        aria-hidden="true"
+      ></div>
+      <div class="max-w-2xl">
+        <h2 id="termin-title" class="text-[1.75rem] leading-tight font-bold tracking-tight text-balance text-white sm:text-4xl">
+          Lernen Sie OpenDesk unverbindlich kennen.
+        </h2>
+        <p class="mt-4 text-lg leading-relaxed text-blue-50">
+          In einem Vorstellungstermin zeigen wir Ihnen OpenDesk live und beantworten Ihre Fragen zu Migration, Hosting
+          und Paketwahl.
+        </p>
+      </div>
+      <div class="flex shrink-0 flex-col items-start gap-4 rounded-2xl bg-white/10 p-6 ring-1 ring-white/15 sm:flex-row sm:items-center lg:flex-col lg:items-start">
+        <div class="flex items-center gap-4">
+          <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-white font-bold text-primary" aria-hidden="true">
+            {{ contact.initials }}
+          </span>
+          <div>
+            <p class="font-bold text-white">{{ contact.name }}</p>
+            <p class="text-sm text-blue-100">{{ contact.role }}</p>
+          </div>
+        </div>
+        <a
+          [href]="contact.mailHref"
+          class="group inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[15px] font-semibold whitespace-nowrap text-primary shadow-lg shadow-blue-950/20 transition hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98] sm:w-auto"
+        >
+          Termin anfragen
+          <ng-icon name="phosphorArrowRight" size="18" class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

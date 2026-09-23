@@ -1,0 +1,199 @@
+<app-page-hero
+  crumb="Managed Services"
+  title="Automatisiert betrieben."
+  highlight="Monatlich abgerechnet."
+  lead="Sechs Service-Linien mit je drei Paketstufen. Standardisiert, automatisiert und mit planbarem Fixpreis pro Monat: Self-Service statt Ticket-Warteschlange, Monitoring statt reiner Reaktion."
+/>
+
+<!-- Principles -->
+<section class="bg-canvas py-16 sm:py-24 lg:py-28" aria-labelledby="principles-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div appReveal class="max-w-2xl">
+      <h2 id="principles-title" class="text-[2rem] leading-[1.12] sm:text-4xl sm:leading-[1.1] font-bold tracking-tight text-balance text-ink md:text-5xl">
+        Warum unsere Services schnell und planbar sind.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-muted">
+        Alle Pakete folgen denselben Automatisierungsprinzipien. Qualität und Reaktionszeit hängen so nicht von der
+        Teamgröße ab.
+      </p>
+    </div>
+
+    <ul class="mt-10 sm:mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (principle of principles; track principle.title; let i = $index) {
+        <!-- Mobile: icon beside the text keeps four cards compact. From sm: stacked tile. -->
+        <li appReveal [revealDelay]="i" class="flex gap-4 rounded-2xl border border-line bg-canvas-alt p-5 sm:flex-col sm:gap-0 sm:p-6">
+          <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-canvas text-primary shadow-sm ring-1 ring-line">
+            <ng-icon [name]="principle.icon" size="22" />
+          </span>
+          <div>
+            <h3 class="font-bold text-ink sm:mt-5">{{ principle.title }}</h3>
+            <p class="mt-1.5 text-[15px] leading-relaxed text-muted sm:mt-2">{{ principle.text }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <!-- Escalation tiers -->
+    <div appReveal class="mt-12 overflow-hidden rounded-2xl bg-night p-6 text-white sm:mt-16 sm:p-10">
+      <h3 class="text-xl font-bold tracking-tight sm:text-2xl">Drei Eskalationsstufen für jede Linie</h3>
+      <ol class="mt-6 grid grid-cols-1 gap-5 sm:mt-8 md:grid-cols-3 md:gap-0">
+        @for (tier of tiers; track tier.tier; let i = $index; let last = $last) {
+          <li class="relative flex gap-4 md:flex-col md:pr-8">
+            <!-- Fixed badge width keeps the text column aligned on mobile. -->
+            <span class="flex h-8 w-16 shrink-0 items-center justify-center self-start rounded-full bg-primary text-xs font-bold whitespace-nowrap">
+              {{ tier.tier }}
+            </span>
+            @if (!last) {
+              <span class="absolute top-4 right-0 left-24 hidden h-px bg-linear-to-r from-blue-400/60 to-transparent md:block" aria-hidden="true"></span>
+            }
+            <div class="md:mt-5">
+              <p class="font-bold">{{ tier.title }}</p>
+              <p class="mt-1.5 text-[15px] leading-relaxed text-slate-300">{{ tier.text }}</p>
+            </div>
+          </li>
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- Catalog -->
+<section id="katalog" class="relative border-y border-line bg-canvas-alt py-16 sm:py-24 lg:py-28" aria-labelledby="catalog-title">
+  <!-- Scroll targets for deep links; the effect in the component selects the matching tab. -->
+  @for (line of lines; track line.id) {
+    <span [id]="line.id" class="absolute top-0" aria-hidden="true"></span>
+  }
+
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div appReveal class="max-w-2xl">
+      <h2 id="catalog-title" class="text-[2rem] leading-[1.12] sm:text-4xl sm:leading-[1.1] font-bold tracking-tight text-balance text-ink md:text-5xl">
+        Alle Service-Linien im Detail.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-muted">Wählen Sie eine Linie, um Paketstufen und eingesetzte Werkzeuge zu sehen.</p>
+      <a
+        routerLink="/konfigurator"
+        class="group mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-canvas px-5 text-sm font-semibold text-primary ring-1 ring-line transition hover:ring-slate-300"
+      >
+        <ng-icon name="phosphorSlidersHorizontal" size="18" />
+        Eigenes Paket kalkulieren
+        <ng-icon name="phosphorArrowRight" size="16" class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" />
+      </a>
+    </div>
+
+    <div
+      appReveal
+      role="tablist"
+      aria-label="Managed-Service-Linien"
+      class="mt-8 grid grid-cols-2 gap-2 sm:mt-10 sm:flex sm:flex-wrap"
+    >
+      <!-- Mobile: all six lines visible as a 2-column grid instead of a clipped horizontal strip. -->
+      @for (line of lines; track line.id; let i = $index) {
+        <button
+          #tab
+          type="button"
+          role="tab"
+          [id]="'tab-' + line.id"
+          [attr.aria-selected]="selectedId() === line.id"
+          [attr.aria-controls]="'panel-' + line.id"
+          [attr.tabindex]="selectedId() === line.id ? 0 : -1"
+          class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-semibold whitespace-nowrap transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-11 sm:justify-start sm:px-4"
+          [class]="
+            selectedId() === line.id
+              ? 'bg-primary text-white shadow-md shadow-blue-600/20'
+              : 'bg-canvas text-ink ring-1 ring-line hover:ring-slate-300'
+          "
+          (click)="select(line.id)"
+          (keydown)="onTabKeydown($event, i)"
+        >
+          <ng-icon [name]="line.icon" size="18" />
+          {{ line.shortTitle }}
+        </button>
+      }
+    </div>
+
+    @for (line of [selected()]; track line.id) {
+      <div
+        role="tabpanel"
+        [id]="'panel-' + line.id"
+        [attr.aria-labelledby]="'tab-' + line.id"
+        tabindex="0"
+        class="mt-8 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-safe:animate-fade-in"
+      >
+        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
+          <div class="max-w-2xl">
+            <h3 class="text-xl font-bold tracking-tight text-ink sm:text-2xl">{{ line.title }}</h3>
+            <p class="mt-2 leading-relaxed text-muted">{{ line.description }}</p>
+          </div>
+          <span class="self-start rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary md:self-auto">
+            Monatlich abgerechnet
+          </span>
+        </div>
+
+        <!--
+          Packages: swipeable row with a visible peek of the next card on phones and tablets,
+          three columns from lg. pt-4 leaves room for the "Häufig gewählt" badge inside the scroll container.
+        -->
+        <div class="mt-6 flex rounded-full bg-canvas p-1 ring-1 ring-line lg:hidden" role="group" aria-label="Paketstufe anzeigen">
+          @for (pkg of line.packages; track pkg.name; let pi = $index) {
+            <button
+              type="button"
+              class="min-h-10 flex-1 rounded-full px-2 text-sm font-semibold transition-colors duration-200"
+              [class]="activePackage() === pi ? 'bg-primary text-white' : 'text-muted'"
+              [attr.aria-pressed]="activePackage() === pi"
+              (click)="showPackage(pi)"
+            >
+              {{ pkg.name }}
+            </button>
+          }
+        </div>
+
+        <ul
+          #packageList
+          class="-mx-4 mt-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pt-4 pb-3 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:mt-6 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden"
+          [attr.aria-label]="'Paketstufen ' + line.shortTitle"
+        >
+          @for (pkg of line.packages; track pkg.name; let pi = $index) {
+            <li
+              class="relative flex w-[84%] shrink-0 snap-start flex-col rounded-2xl p-6 sm:w-[46%] sm:p-7 lg:w-auto"
+              [class]="pi === 1 ? 'bg-canvas shadow-lg shadow-slate-900/10 ring-2 ring-primary' : 'bg-canvas ring-1 ring-line'"
+            >
+              @if (pi === 1) {
+                <span class="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white sm:left-7">
+                  Häufig gewählt
+                </span>
+              }
+              <p class="text-sm font-semibold text-primary">{{ pkg.audience }}</p>
+              <h4 class="mt-1 text-2xl font-bold tracking-tight text-ink">{{ pkg.name }}</h4>
+              <ul class="mt-6 flex flex-1 flex-col gap-3 text-[15px]">
+                @for (feature of pkg.features; track feature) {
+                  <li class="flex gap-3 text-ink">
+                    <ng-icon name="phosphorCheckCircle" size="20" class="mt-px shrink-0 text-primary" />
+                    {{ feature }}
+                  </li>
+                }
+              </ul>
+              <p class="mt-6 border-t border-line pt-4 text-sm text-muted">
+                <span class="font-semibold text-ink">Persönlicher Einsatz:</span> {{ pkg.humanTouch }}
+              </p>
+            </li>
+          }
+        </ul>
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-8">
+          <p class="text-sm font-semibold text-ink">Eingesetzte Werkzeuge</p>
+          <ul class="flex flex-wrap gap-2">
+            @for (tool of line.tools; track tool) {
+              <li class="rounded-full bg-canvas px-3 py-1.5 text-sm text-muted ring-1 ring-line">{{ tool }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<app-cta-banner
+  title="Welches Paket passt zu Ihrer IT?"
+  text="Wir empfehlen Ihnen anhand Ihrer aktuellen Infrastruktur die passende Paketstufe. Unverbindlich und transparent."
+  topic="managed-services"
+/>

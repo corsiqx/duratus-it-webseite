@@ -1,0 +1,114 @@
+/* ng-icons ships its color rule in an "ng-icon" layer; declare it first so Tailwind text-* utilities win. */
+@layer ng-icon;
+@import 'tailwindcss';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+/*
+ * Duratus IT design tokens (primitive -> semantic). Components use the semantic names only.
+ * Surfaces: navy hero / page heroes / footer, light content sections.
+ * Radius rule: buttons = rounded-full, surfaces = rounded-2xl, inputs = rounded-lg.
+ */
+
+/* Primitive brand values taken from the existing Duratus IT logo. */
+@theme {
+  --color-brand-navy: #0d1f3c;
+  --color-brand-teal: #1b9e8c;
+
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-fade-up: fade-up 0.9s var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 0.5s var(--ease-out-expo) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Semantic tokens. */
+@theme inline {
+  --color-primary: var(--color-blue-600);
+  --color-primary-hover: var(--color-blue-700);
+  --color-primary-soft: var(--color-blue-50);
+  --color-primary-on-night: var(--color-blue-400);
+
+  --color-ink: var(--color-slate-950);
+  --color-muted: var(--color-slate-600);
+  --color-line: var(--color-slate-200);
+
+  --color-canvas: var(--color-white);
+  --color-canvas-alt: var(--color-slate-50);
+  --color-night: var(--color-slate-950);
+}
+
+@layer base {
+  html {
+    @apply bg-canvas text-ink antialiased;
+    color-scheme: light;
+  }
+
+  body {
+    @apply font-sans selection:bg-primary/15 selection:text-ink;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  summary {
+    @apply cursor-pointer;
+  }
+
+  [id] {
+    @apply scroll-mt-24;
+  }
+}
+
+/* Route changes cross-fade via the View Transitions API; the fixed header keeps its own layer. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: 180ms var(--ease-out-expo) both vt-fade-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: 420ms var(--ease-out-expo) both vt-fade-in;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}

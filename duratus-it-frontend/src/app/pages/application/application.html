@@ -1,0 +1,270 @@
+<app-page-hero
+  crumb="Bewerbung"
+  title="Bewirb dich,"
+  highlight="ganz ohne Anschreiben."
+  lead="Wähle eine offene Stelle oder bewirb dich initiativ. Ein Lebenslauf als PDF reicht uns, den Rest klären wir im Gespräch."
+/>
+
+<section class="bg-canvas-alt py-12 sm:py-20 lg:py-24" aria-label="Bewerbungsformular">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 sm:gap-8 sm:px-6 lg:grid-cols-12 lg:px-8">
+    <div appReveal class="lg:col-span-7">
+      <div id="bewerbungsformular" class="rounded-2xl bg-canvas p-5 shadow-xl shadow-slate-900/5 ring-1 ring-line sm:p-10">
+        @if (state() === 'success') {
+          <div class="flex min-h-[32rem] flex-col items-start justify-center" role="status" aria-live="polite">
+            <span class="flex size-14 items-center justify-center rounded-full bg-primary-soft text-primary">
+              <ng-icon name="phosphorCheckCircle" size="32" />
+            </span>
+            <h2 class="mt-6 text-2xl font-bold tracking-tight text-ink">Danke für deine Bewerbung.</h2>
+            <p class="mt-3 max-w-[46ch] leading-relaxed text-muted">
+              Wir haben deine Unterlagen für <span class="font-semibold text-ink">{{ positionLabel() }}</span> erhalten und
+              melden uns innerhalb von zwei Werktagen bei dir.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <button
+                type="button"
+                class="min-h-11 rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-slate-400 hover:bg-canvas-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+                (click)="startOver()"
+              >
+                Weitere Bewerbung senden
+              </button>
+              <a
+                routerLink="/karriere"
+                class="inline-flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary-soft"
+              >
+                Zurück zu den Stellen
+              </a>
+            </div>
+          </div>
+        } @else {
+          <h2 class="text-2xl font-bold tracking-tight text-ink">Deine Bewerbung</h2>
+          <p class="mt-2 text-sm text-muted">Pflichtfelder sind mit * gekennzeichnet.</p>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:mt-8 sm:gap-6">
+            <div class="col-span-2 flex flex-col gap-2">
+              <label for="a-position" class="text-sm font-semibold text-ink">Worauf bewirbst du dich? *</label>
+              <select
+                id="a-position"
+                formControlName="position"
+                class="min-h-12 rounded-lg border border-slate-300 bg-canvas px-4 py-3 text-base text-ink transition outline-none hover:border-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/15"
+              >
+                @for (job of jobs; track job.id) {
+                  <option [value]="job.id">{{ job.title }}</option>
+                }
+                <option [value]="spontaneous">Initiativbewerbung</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="a-first" class="text-sm font-semibold text-ink">Vorname *</label>
+              <input id="a-first" type="text" formControlName="firstName" autocomplete="given-name"
+                class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+                [class]="fieldClass('firstName')" [attr.aria-invalid]="showError('firstName')" aria-describedby="a-first-error" />
+              @if (showError('firstName')) {
+                <p id="a-first-error" class="text-sm font-medium text-red-600">Bitte gib deinen Vornamen an.</p>
+              }
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="a-last" class="text-sm font-semibold text-ink">Nachname *</label>
+              <input id="a-last" type="text" formControlName="lastName" autocomplete="family-name"
+                class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+                [class]="fieldClass('lastName')" [attr.aria-invalid]="showError('lastName')" aria-describedby="a-last-error" />
+              @if (showError('lastName')) {
+                <p id="a-last-error" class="text-sm font-medium text-red-600">Bitte gib deinen Nachnamen an.</p>
+              }
+            </div>
+
+            <div class="col-span-2 flex flex-col gap-2 sm:col-span-1">
+              <label for="a-email" class="text-sm font-semibold text-ink">E-Mail *</label>
+              <input id="a-email" type="email" formControlName="email" autocomplete="email"
+                class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+                [class]="fieldClass('email')" [attr.aria-invalid]="showError('email')" aria-describedby="a-email-error" />
+              @if (showError('email')) {
+                <p id="a-email-error" class="text-sm font-medium text-red-600">Bitte eine gültige E-Mail-Adresse angeben.</p>
+              }
+            </div>
+
+            <div class="col-span-2 flex flex-col gap-2 sm:col-span-1">
+              <label for="a-phone" class="text-sm font-semibold text-ink">Telefon</label>
+              <input id="a-phone" type="tel" formControlName="phone" autocomplete="tel"
+                class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+                [class]="fieldClass('phone')" />
+            </div>
+
+            <div class="col-span-2 flex flex-col gap-2 sm:col-span-1">
+              <label for="a-start" class="text-sm font-semibold text-ink">Frühester Start</label>
+              <input id="a-start" type="text" formControlName="availableFrom" placeholder="z. B. ab sofort oder 01.03."
+                class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none placeholder:text-slate-500 focus:ring-4"
+                [class]="fieldClass('availableFrom')" />
+            </div>
+
+            <div class="col-span-2 flex flex-col gap-2 sm:col-span-1">
+              <label for="a-profile" class="text-sm font-semibold text-ink">Profil oder Portfolio</label>
+              <input id="a-profile" type="url" formControlName="profileUrl" placeholder="LinkedIn, GitHub, Website"
+                class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none placeholder:text-slate-500 focus:ring-4"
+                [class]="fieldClass('profileUrl')" />
+            </div>
+
+            <!-- Documents -->
+            <div class="col-span-2 flex flex-col gap-2">
+              <span class="text-sm font-semibold text-ink">Unterlagen</span>
+              <label
+                for="a-files"
+                class="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-canvas-alt px-4 py-6 text-center transition-colors hover:border-primary hover:bg-primary-soft/50 focus-within:border-primary"
+              >
+                <ng-icon name="phosphorUploadSimple" size="24" class="text-primary" />
+                <span class="text-sm font-semibold text-ink">Lebenslauf und Zeugnisse auswählen</span>
+                <span class="text-xs text-muted">PDF oder Word, maximal {{ maxFiles }} Dateien mit je 10 MB</span>
+                <input
+                  id="a-files"
+                  type="file"
+                  class="sr-only"
+                  multiple
+                  accept="application/pdf,.pdf,.doc,.docx"
+                  (change)="addFiles($event)"
+                />
+              </label>
+
+              @if (fileError()) {
+                <p class="flex items-start gap-2 text-sm font-medium text-red-600" role="alert">
+                  <ng-icon name="phosphorWarningCircle" size="18" class="mt-px shrink-0" />
+                  {{ fileError() }}
+                </p>
+              }
+
+              @if (documents().length) {
+                <ul class="flex flex-col gap-2" aria-live="polite">
+                  @for (file of documents(); track file.name; let i = $index) {
+                    <li class="flex items-center gap-3 rounded-lg bg-canvas-alt px-3 py-2.5 ring-1 ring-line">
+                      <ng-icon name="phosphorFilePdf" size="20" class="shrink-0 text-primary" />
+                      <span class="min-w-0 flex-1">
+                        <span class="block truncate text-sm font-medium text-ink">{{ file.name }}</span>
+                        <span class="block text-xs text-muted">{{ fileSize(file) }}</span>
+                      </span>
+                      <button
+                        type="button"
+                        class="flex size-9 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-canvas hover:text-red-600 focus-visible:outline-2 focus-visible:outline-primary"
+                        (click)="removeFile(i)"
+                      >
+                        <ng-icon name="phosphorTrash" size="18" />
+                        <span class="sr-only">{{ file.name }} entfernen</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+
+            <div class="col-span-2 flex flex-col gap-2">
+              <label for="a-message" class="text-sm font-semibold text-ink">Was sollen wir über dich wissen?</label>
+              <textarea id="a-message" rows="4" formControlName="message"
+                placeholder="Ein paar Sätze reichen: was du machst, was dich interessiert."
+                class="resize-y rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none placeholder:text-slate-500 focus:ring-4"
+                [class]="fieldClass('message')"></textarea>
+            </div>
+
+            <div class="col-span-2 flex flex-col gap-2">
+              <label class="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-muted">
+                <input id="a-privacy" type="checkbox" formControlName="privacy" class="mt-0.5 size-5 shrink-0 cursor-pointer rounded accent-primary"
+                  [attr.aria-invalid]="showError('privacy')" />
+                <span>
+                  Ich habe die
+                  <a routerLink="/datenschutz" class="font-semibold text-primary-hover underline decoration-blue-300 underline-offset-4 hover:decoration-primary-hover">Datenschutzerklärung</a>
+                  gelesen und bin mit der Speicherung meiner Bewerbungsunterlagen für das Bewerbungsverfahren einverstanden. *
+                </span>
+              </label>
+              @if (showError('privacy')) {
+                <p class="text-sm font-medium text-red-600">Bitte bestätige die Datenschutzerklärung.</p>
+              }
+            </div>
+
+            @if (state() === 'error') {
+              <div class="col-span-2 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+                <ng-icon name="phosphorWarningCircle" size="20" class="mt-px shrink-0" />
+                Deine Bewerbung konnte nicht gesendet werden. Bitte versuche es erneut oder schicke uns die Unterlagen per E-Mail.
+              </div>
+            }
+
+            <div class="col-span-2">
+              <button
+                type="submit"
+                class="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-[15px] font-semibold whitespace-nowrap text-white shadow-lg shadow-blue-600/20 transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98] disabled:cursor-progress disabled:opacity-70 sm:w-auto"
+                [disabled]="state() === 'submitting'"
+              >
+                @if (state() === 'submitting') {
+                  <ng-icon name="phosphorCircleNotch" size="18" class="motion-safe:animate-spin" />
+                  Wird gesendet
+                } @else {
+                  Bewerbung senden
+                  <ng-icon name="phosphorArrowRight" size="18" class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" />
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+
+    <aside class="flex flex-col gap-4 lg:col-span-5">
+      <div appReveal [revealDelay]="1" class="rounded-2xl bg-night p-6 text-white sm:p-8">
+        <h2 class="text-xl font-bold tracking-tight">So läuft es ab</h2>
+        <ol class="mt-6 flex flex-col gap-5">
+          @for (step of steps; track step.title; let i = $index) {
+            <li class="flex gap-4">
+              <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold" aria-hidden="true">
+                {{ i + 1 }}
+              </span>
+              <div>
+                <p class="font-bold">{{ step.title }}</p>
+                <p class="mt-1 text-[15px] leading-relaxed text-slate-300">{{ step.text }}</p>
+              </div>
+            </li>
+          }
+        </ol>
+      </div>
+
+      <div appReveal [revealDelay]="2" class="rounded-2xl bg-canvas p-6 ring-1 ring-line sm:p-8">
+        <h2 class="text-lg font-bold tracking-tight text-ink">Fragen vor der Bewerbung?</h2>
+        <p class="mt-2 leading-relaxed text-muted">
+          Ruf einfach an oder schreib uns. Lieber vorher kurz sprechen als lange überlegen.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a
+            [href]="company.phoneHref"
+            class="inline-flex min-h-11 items-center gap-2 rounded-full bg-canvas-alt px-4 text-sm font-semibold text-ink ring-1 ring-line transition hover:ring-slate-300"
+          >
+            <ng-icon name="phosphorPhone" size="16" class="text-primary" />
+            {{ company.phone }}
+          </a>
+          <a
+            [href]="'mailto:' + company.email"
+            class="inline-flex min-h-11 items-center gap-2 rounded-full bg-canvas-alt px-4 text-sm font-semibold text-ink ring-1 ring-line transition hover:ring-slate-300"
+          >
+            <ng-icon name="phosphorEnvelopeSimple" size="16" class="text-primary" />
+            E-Mail
+          </a>
+        </div>
+        <p class="mt-5 text-sm text-muted">
+          Du willst dich lieber klassisch per E-Mail bewerben? Schick deine Unterlagen an
+          <a [href]="'mailto:' + company.email + '?subject=Bewerbung'" class="font-semibold text-primary-hover underline decoration-blue-300 underline-offset-4">
+            {{ company.email }}
+          </a>
+        </p>
+      </div>
+
+      <div appReveal [revealDelay]="3" class="rounded-2xl bg-primary-soft p-6 sm:p-8">
+        <h2 class="text-lg font-bold tracking-tight text-ink">Noch unsicher, welche Stelle passt?</h2>
+        <p class="mt-2 leading-relaxed text-muted">
+          Auf der Karriereseite findest du alle offenen Stellen mit Aufgaben und Profil.
+        </p>
+        <a
+          routerLink="/karriere"
+          class="group mt-4 inline-flex items-center gap-2 font-semibold text-primary hover:text-primary-hover"
+        >
+          Offene Stellen ansehen
+          <ng-icon name="phosphorArrowRight" size="18" class="transition-transform duration-300 ease-out-expo group-hover:translate-x-1" />
+        </a>
+      </div>
+    </aside>
+  </div>
+</section>

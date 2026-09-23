@@ -1,0 +1,83 @@
+<section appDarkSurface class="relative isolate overflow-hidden bg-night lg:min-h-[100dvh]" aria-labelledby="hero-title">
+  <div
+    class="relative mx-auto flex max-w-7xl flex-col px-4 pt-28 sm:px-6 sm:pt-32 lg:min-h-[100dvh] lg:justify-center lg:px-8 lg:pt-20 lg:pb-16"
+  >
+    <div class="max-w-[42rem]">
+      <p
+        class="inline-flex items-center rounded-full border border-blue-400/25 bg-blue-500/10 px-3.5 py-1.5 text-sm font-medium text-blue-200 motion-safe:animate-fade-up"
+      >
+        IT-Systemhaus für den Mittelstand
+      </p>
+
+      <h1
+        id="hero-title"
+        class="mt-6 text-[2.75rem] leading-[1.06] font-bold tracking-tight text-white motion-safe:animate-fade-up motion-safe:[animation-delay:80ms] sm:text-6xl xl:text-[4.25rem]"
+      >
+        Ihre IT.<br />
+        <span class="sm:whitespace-nowrap"><span class="text-primary-on-night">Beständig.</span> Sicher.</span>
+      </h1>
+
+      <p
+        class="mt-6 max-w-[34rem] text-lg leading-relaxed text-pretty text-slate-300 motion-safe:animate-fade-up motion-safe:[animation-delay:160ms]"
+      >
+        Hardware-Beschaffung, automatisierte Managed Services und IT-Beratung unter einem Dach. Damit Ihr Unternehmen
+        stabil läuft, heute und morgen.
+      </p>
+
+      <div
+        class="mt-10 flex flex-col gap-3 motion-safe:animate-fade-up motion-safe:[animation-delay:240ms] sm:flex-row sm:items-center"
+      >
+        <a
+          routerLink="/kontakt"
+          class="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary py-3.5 pr-5 pl-6 text-[15px] font-semibold whitespace-nowrap text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-on-night active:scale-[0.98]"
+        >
+          {{ cta }}
+          <ng-icon
+            name="phosphorArrowRight"
+            size="18"
+            class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5"
+          />
+        </a>
+        <a
+          routerLink="/"
+          fragment="leistungen"
+          class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 px-6 py-3.5 text-[15px] font-semibold whitespace-nowrap text-white transition hover:border-white/40 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-on-night active:scale-[0.98]"
+        >
+          Leistungen entdecken
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D stage: stacked below the copy on small screens, full-bleed behind it on desktop. -->
+  <div
+    class="relative -z-10 mt-2 h-[22rem] mask-t-from-85% mask-b-from-75% sm:h-[32rem] lg:absolute lg:inset-0 lg:mt-0 lg:h-auto lg:mask-t-from-90% lg:mask-b-from-80%"
+    aria-hidden="true"
+  >
+    <div
+      #stage
+      class="size-full transition-opacity duration-1000 ease-out-expo"
+      [class.opacity-0]="sceneState() === 'loading'"
+      [class.hidden]="sceneState() === 'fallback'"
+    ></div>
+
+    @if (sceneState() === 'fallback') {
+      <div class="flex size-full items-center justify-center lg:justify-end lg:pr-[8%]">
+        <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 text-slate-300 sm:gap-5 sm:p-8">
+          <ng-icon name="phosphorHardDrives" size="40" />
+          <span class="h-px w-8 bg-blue-400/60 sm:w-14"></span>
+          <ng-icon name="phosphorTreeStructure" size="40" class="text-primary-on-night" />
+          <span class="h-px w-8 bg-blue-400/60 sm:w-14"></span>
+          <div class="flex flex-col gap-3">
+            <ng-icon name="phosphorDesktopTower" size="32" />
+            <ng-icon name="phosphorLaptop" size="32" />
+          </div>
+        </div>
+      </div>
+    }
+
+    <div
+      class="pointer-events-none absolute inset-y-0 left-0 hidden w-[48%] bg-linear-to-r from-night via-night/75 to-transparent lg:block"
+    ></div>
+  </div>
+</section>
