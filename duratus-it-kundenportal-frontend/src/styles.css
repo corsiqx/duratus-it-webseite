@@ -1,0 +1,86 @@
+/* ng-icons ships its color rule in an "ng-icon" layer; declare it first so Tailwind text-* utilities win. */
+@layer ng-icon;
+@import 'tailwindcss';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+/*
+ * Duratus IT design tokens, identical to the website (duratus-it-frontend). Components use the semantic names only.
+ * Portal surfaces: navy sidebar, light workspace (canvas-alt) with white cards.
+ * Radius rule: buttons = rounded-full, surfaces = rounded-2xl, inputs = rounded-lg.
+ */
+
+/* Primitive brand values taken from the existing Duratus IT logo. */
+@theme {
+  --color-brand-navy: #0d1f3c;
+  --color-brand-teal: #1b9e8c;
+
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* fill-mode backwards: no transform remains after the animation, so position: fixed children (sticky action bars) stay relative to the viewport. */
+  --animate-fade-up: fade-up 0.6s var(--ease-out-expo) backwards;
+  --animate-fade-in: fade-in 0.4s var(--ease-out-expo) backwards;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.375rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Semantic tokens. */
+@theme inline {
+  --color-primary: var(--color-blue-600);
+  --color-primary-hover: var(--color-blue-700);
+  --color-primary-soft: var(--color-blue-50);
+  --color-primary-on-night: var(--color-blue-400);
+
+  --color-ink: var(--color-slate-950);
+  --color-muted: var(--color-slate-600);
+  --color-line: var(--color-slate-200);
+
+  --color-canvas: var(--color-white);
+  --color-canvas-alt: var(--color-slate-50);
+  --color-night: var(--color-slate-950);
+}
+
+@layer base {
+  html {
+    @apply bg-canvas-alt text-ink antialiased;
+    color-scheme: light;
+  }
+
+  body {
+    @apply font-sans selection:bg-primary/15 selection:text-ink;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  summary {
+    @apply cursor-pointer;
+  }
+
+  /* Fields focused from code (first invalid field) stay clear of the sticky top bar. */
+  input,
+  textarea,
+  select {
+    @apply scroll-mt-24;
+  }
+}

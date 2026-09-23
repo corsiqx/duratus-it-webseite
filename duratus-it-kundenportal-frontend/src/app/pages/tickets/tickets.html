@@ -1,0 +1,78 @@
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <p class="text-sm text-muted sm:text-base">
+    Melden Sie Störungen und Wünsche. Den Verlauf jedes Tickets sehen Sie hier.
+  </p>
+  <button
+    type="button"
+    class="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+    (click)="openDialog()"
+  >
+    <ng-icon name="phosphorPlus" size="18" />
+    Neues Ticket
+  </button>
+</div>
+
+<div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <app-filter-tabs label="Tickets filtern" [options]="filterOptions()" [(value)]="filter" />
+  <label class="relative block sm:w-72">
+    <span class="sr-only">Tickets durchsuchen</span>
+    <ng-icon name="phosphorMagnifyingGlass" size="18" class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400" />
+    <input
+      type="search"
+      placeholder="Nummer oder Betreff"
+      class="min-h-11 w-full rounded-full border border-slate-300 bg-canvas py-2 pr-4 pl-10 text-base text-ink transition outline-none placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/15 sm:text-sm"
+      [value]="query()"
+      (input)="query.set($any($event.target).value)"
+    />
+  </label>
+</div>
+
+@if (visibleTickets().length === 0) {
+  <div class="mt-5 flex flex-col items-center rounded-2xl bg-canvas px-6 py-14 text-center ring-1 ring-line">
+    <span class="flex size-12 items-center justify-center rounded-full bg-canvas-alt text-slate-400">
+      <ng-icon name="phosphorLifebuoy" size="24" />
+    </span>
+    <p class="mt-4 font-semibold text-ink">Keine Tickets gefunden</p>
+    <p class="mt-1 text-sm text-muted">Passen Sie Filter oder Suche an.</p>
+  </div>
+} @else {
+  <ul class="mt-5 flex flex-col divide-y divide-line overflow-hidden rounded-2xl bg-canvas ring-1 ring-line" aria-live="polite">
+    @for (ticket of visibleTickets(); track ticket.id) {
+      <li>
+        <a
+          [routerLink]="['/tickets', ticket.id]"
+          class="group flex items-start gap-4 px-4 py-4 transition-colors hover:bg-canvas-alt/70 focus-visible:bg-canvas-alt focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:px-5"
+        >
+          <span
+            class="mt-0.5 hidden size-10 shrink-0 items-center justify-center rounded-xl sm:flex"
+            [class]="ticket.status === 'rueckfrage' ? 'bg-amber-50 text-amber-700' : 'bg-canvas-alt text-slate-500'"
+          >
+            <ng-icon [name]="categoryLabel[ticket.category].icon" size="20" />
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+              <span class="font-semibold tabular-nums">{{ ticket.id }}</span>
+              <span aria-hidden="true">·</span>
+              <span>{{ categoryLabel[ticket.category].label }}</span>
+            </span>
+            <span class="mt-1 block font-semibold text-ink group-hover:text-primary-hover">{{ ticket.subject }}</span>
+            <span class="mt-1 block text-sm text-muted">
+              {{ lastActivity(ticket) }} <span class="whitespace-nowrap">· <span class="hidden sm:inline">aktualisiert am </span><span class="tabular-nums">{{ ticket.updated }}</span></span>
+            </span>
+            <span class="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 md:hidden">
+              <app-status-badge [status]="statusLabel[ticket.status]" />
+              <span class="text-xs text-muted">Priorität {{ priorityLabel[ticket.priority].label }}</span>
+            </span>
+          </span>
+          <span class="hidden shrink-0 flex-col items-end gap-2 md:flex">
+            <app-status-badge [status]="statusLabel[ticket.status]" />
+            <span class="text-xs text-muted">Priorität {{ priorityLabel[ticket.priority].label }}</span>
+          </span>
+          <span class="hidden shrink-0 self-center text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-primary sm:flex"><ng-icon name="phosphorCaretRight" size="16" /></span>
+        </a>
+      </li>
+    }
+  </ul>
+}
+
+<app-new-ticket-dialog [open]="dialogOpen()" [prefill]="prefill()" (closed)="dialogOpen.set(false)" (created)="onCreated($event)" />

@@ -1,0 +1,135 @@
+<p class="text-sm text-muted sm:text-base">
+  Der aktuelle Zustand der Systeme, die wir für {{ store.customer().name }} betreuen.
+</p>
+
+<!-- Service health -->
+<ul class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+  @for (item of store.serviceHealth(); track item.id) {
+    <li class="flex flex-col rounded-2xl bg-canvas p-4 ring-1 ring-line sm:p-5">
+      <div class="flex items-center gap-3">
+        <span
+          class="flex size-10 shrink-0 items-center justify-center rounded-xl"
+          [class]="item.state === 'ok' ? 'bg-teal-50 text-teal-700' : item.state === 'hinweis' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'"
+        >
+          <ng-icon [name]="item.icon" size="21" />
+        </span>
+        <h2 class="min-w-0 flex-1 truncate text-base font-bold tracking-tight text-ink">{{ item.label }}</h2>
+        <app-status-badge [status]="healthLabel[item.state]" />
+      </div>
+      <p class="mt-3 text-sm font-medium text-ink">{{ item.summary }}</p>
+      <p class="mt-1 text-sm text-muted">{{ item.detail }}</p>
+    </li>
+  }
+</ul>
+
+<!-- Patch compliance -->
+<section class="mt-4 rounded-2xl bg-canvas p-5 ring-1 ring-line sm:mt-5 sm:p-6" aria-labelledby="patch-heading">
+  <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+    <h2 id="patch-heading" class="text-base font-bold tracking-tight text-ink">Update-Stand</h2>
+    <p class="text-sm text-muted">
+      <span class="font-semibold text-ink tabular-nums">{{ store.patchSummary().percent }} %</span>
+      ({{ store.patchSummary().current }} von {{ store.patchSummary().total }} Geräten)
+    </p>
+  </div>
+  <div
+    class="mt-3 h-2.5 rounded-full bg-slate-100"
+    role="progressbar"
+    aria-labelledby="patch-heading"
+    [attr.aria-valuenow]="store.patchSummary().percent"
+    aria-valuemin="0"
+    aria-valuemax="100"
+  >
+    <div class="h-2.5 rounded-full bg-teal-600" [style.width.%]="store.patchSummary().percent"></div>
+  </div>
+  <p class="mt-3 flex items-start gap-2 text-sm text-muted">
+    <ng-icon name="phosphorInfo" size="17" class="mt-0.5 shrink-0 text-primary" />
+    Updates installieren wir automatisch im monatlichen Patch-Fenster. Geräte, die dabei ausgeschaltet waren, folgen beim nächsten Start.
+  </p>
+</section>
+
+<!-- Devices -->
+<section class="mt-8" aria-labelledby="devices-heading">
+  <div class="flex flex-wrap items-baseline justify-between gap-3">
+    <h2 id="devices-heading" class="text-lg font-bold tracking-tight text-ink">Betreute Geräte</h2>
+    <a
+      [routerLink]="['/tickets']"
+      [queryParams]="{ neu: 1, betreff: 'Neues Gerät aufnehmen', kategorie: 'arbeitsplatz' }"
+      class="-mr-2 inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-soft hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-primary"
+    >
+      <ng-icon name="phosphorPlus" size="16" />
+      Gerät hinzufügen
+    </a>
+  </div>
+
+  <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <app-filter-tabs label="Geräte filtern" [options]="filterOptions()" [(value)]="filter" />
+    <label class="relative block sm:w-72">
+      <span class="sr-only">Geräte durchsuchen</span>
+      <ng-icon name="phosphorMagnifyingGlass" size="18" class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400" />
+      <input
+        type="search"
+        placeholder="Gerätename oder Abteilung"
+        class="min-h-11 w-full rounded-full border border-slate-300 bg-canvas py-2 pr-4 pl-10 text-base text-ink transition outline-none placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/15 sm:text-sm"
+        [value]="query()"
+        (input)="query.set($any($event.target).value)"
+      />
+    </label>
+  </div>
+
+  @if (visibleDevices().length === 0) {
+    <p class="mt-4 rounded-2xl bg-canvas px-6 py-10 text-center text-sm text-muted ring-1 ring-line">Keine Geräte gefunden.</p>
+  } @else {
+    <!-- Desktop table -->
+    <div class="mt-4 hidden overflow-hidden rounded-2xl bg-canvas ring-1 ring-line md:block">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-line bg-canvas-alt text-xs font-semibold text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Gerät</th>
+            <th scope="col" class="px-5 py-3">Abteilung</th>
+            <th scope="col" class="px-5 py-3">Betriebssystem</th>
+            <th scope="col" class="px-5 py-3">Updates</th>
+            <th scope="col" class="px-5 py-3">Zuletzt online</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          @for (device of visibleDevices(); track device.name) {
+            <tr class="transition-colors hover:bg-canvas-alt/60">
+              <td class="px-5 py-3.5">
+                <span class="flex items-center gap-2.5 font-semibold text-ink">
+                  <ng-icon [name]="device.type === 'Notebook' ? 'phosphorLaptop' : 'phosphorDesktop'" size="18" class="text-slate-400" />
+                  {{ device.name }}
+                </span>
+              </td>
+              <td class="px-5 py-3.5 text-ink">{{ device.department }}</td>
+              <td class="px-5 py-3.5 text-muted">{{ device.os }}</td>
+              <td class="px-5 py-3.5"><app-status-badge [status]="patchLabel[device.patch]" /></td>
+              <td class="px-5 py-3.5 whitespace-nowrap">
+                <span class="inline-flex items-center gap-2 tabular-nums" [class]="device.online ? 'text-ink' : 'text-muted'">
+                  <span class="size-2 rounded-full" [class]="device.online ? 'bg-teal-500' : 'bg-slate-300'" aria-hidden="true"></span>
+                  {{ device.online ? 'Online' : device.lastSeen }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phone list -->
+    <ul class="mt-4 flex flex-col divide-y divide-line overflow-hidden rounded-2xl bg-canvas ring-1 ring-line md:hidden">
+      @for (device of visibleDevices(); track device.name) {
+        <li class="flex items-center gap-3 px-4 py-3">
+          <ng-icon [name]="device.type === 'Notebook' ? 'phosphorLaptop' : 'phosphorDesktop'" size="20" class="shrink-0 text-slate-400" />
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-ink">{{ device.name }}</p>
+            <p class="mt-0.5 flex items-center gap-1.5 text-xs text-muted">
+              <span class="size-1.5 rounded-full" [class]="device.online ? 'bg-teal-500' : 'bg-slate-300'" aria-hidden="true"></span>
+              {{ device.department }} · {{ device.online ? 'Online' : 'zuletzt ' + device.lastSeen }}
+            </p>
+          </div>
+          <app-status-badge [status]="patchLabel[device.patch]" />
+        </li>
+      }
+    </ul>
+  }
+</section>

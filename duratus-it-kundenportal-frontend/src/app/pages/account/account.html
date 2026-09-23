@@ -1,0 +1,147 @@
+<div class="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-3">
+  <div class="flex flex-col gap-4 sm:gap-5 lg:col-span-2">
+    <!-- Profile -->
+    <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-7" aria-labelledby="profile-heading">
+      <div class="flex items-center gap-4">
+        <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white" aria-hidden="true">{{ initials() }}</span>
+        <div class="min-w-0">
+          <h2 id="profile-heading" class="truncate text-lg font-bold tracking-tight text-ink">{{ store.account().name }}</h2>
+          <p class="truncate text-sm text-muted">{{ store.account().position }} · {{ store.customer().name }}</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="saveProfile()" novalidate class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div class="flex flex-col gap-2">
+          <label for="a-name" class="text-sm font-semibold text-ink">Name *</label>
+          <input id="a-name" type="text" formControlName="name" autocomplete="name"
+            class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+            [class]="fieldClass('name')" [attr.aria-invalid]="showError('name')" aria-describedby="a-name-error" />
+          @if (showError('name')) {
+            <p id="a-name-error" class="text-sm font-medium text-red-600">Bitte geben Sie Ihren Namen an.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="a-position" class="text-sm font-semibold text-ink">Position</label>
+          <input id="a-position" type="text" formControlName="position" autocomplete="organization-title"
+            class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+            [class]="fieldClass('position')" />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="a-email" class="text-sm font-semibold text-ink">E-Mail *</label>
+          <input id="a-email" type="email" formControlName="email" autocomplete="email"
+            class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+            [class]="fieldClass('email')" [attr.aria-invalid]="showError('email')" aria-describedby="a-email-error" />
+          @if (showError('email')) {
+            <p id="a-email-error" class="text-sm font-medium text-red-600">Bitte geben Sie eine gültige E-Mail-Adresse an.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="a-phone" class="text-sm font-semibold text-ink">Telefon für Rückrufe</label>
+          <input id="a-phone" type="tel" formControlName="phone" autocomplete="tel"
+            class="min-h-12 rounded-lg border bg-canvas px-4 py-3 text-base text-ink transition outline-none focus:ring-4"
+            [class]="fieldClass('phone')" />
+        </div>
+        <div class="sm:col-span-2">
+          <button type="submit"
+            class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold sm:w-auto text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]">
+            <ng-icon name="phosphorCheckCircle" size="18" />
+            Daten speichern
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Notification preferences -->
+    <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-7" aria-labelledby="prefs-heading">
+      <h2 id="prefs-heading" class="text-base font-bold tracking-tight text-ink">E-Mail-Benachrichtigungen</h2>
+      <p class="mt-1 text-sm text-muted">Im Portal sehen Sie alle Benachrichtigungen unabhängig davon an der Glocke.</p>
+      <ul class="mt-4 divide-y divide-line">
+        @for (option of prefOptions; track option.key) {
+          <li class="flex items-center justify-between gap-4 py-4">
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-ink" [id]="'pref-' + option.key">{{ option.label }}</p>
+              <p class="mt-0.5 text-sm text-muted">{{ option.text }}</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              [attr.aria-checked]="store.prefs()[option.key]"
+              [attr.aria-labelledby]="'pref-' + option.key"
+              class="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 before:absolute before:-inset-2.5 before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              [class]="store.prefs()[option.key] ? 'bg-primary' : 'bg-slate-300'"
+              (click)="togglePref(option.key)"
+            >
+              <span
+                class="inline-block size-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out-expo motion-reduce:transition-none"
+                [class]="store.prefs()[option.key] ? 'translate-x-6' : 'translate-x-1'"
+              ></span>
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+
+  <aside class="flex flex-col gap-4 sm:gap-5" aria-label="Zugang und Demo">
+    <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6" aria-labelledby="access-heading">
+      <h2 id="access-heading" class="text-base font-bold tracking-tight text-ink">Zugang</h2>
+      <dl class="mt-4 flex flex-col gap-3 text-sm">
+        <div>
+          <dt class="text-muted">Angemeldet als</dt>
+          <dd class="mt-0.5 font-medium break-all text-ink">{{ sessionEmail() }}</dd>
+        </div>
+        <div>
+          <dt class="text-muted">Seit</dt>
+          <dd class="mt-0.5 font-medium text-ink tabular-nums">{{ signedInSince() }}</dd>
+        </div>
+        <div>
+          <dt class="text-muted">Berechtigungen</dt>
+          <dd class="mt-1.5 flex flex-wrap gap-1.5">
+            @for (right of ['Angebote unterschreiben', 'Rechnungen', 'Tickets', 'Zahlungsdaten']; track right) {
+              <span class="inline-flex items-center gap-1 rounded-full bg-canvas-alt px-2.5 py-1 text-xs font-medium text-ink ring-1 ring-line">
+                <ng-icon name="phosphorCheck" size="12" class="text-teal-600" />{{ right }}
+              </span>
+            }
+          </dd>
+        </div>
+      </dl>
+      <button type="button" (click)="logout()"
+        class="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold text-ink ring-1 ring-slate-300 transition hover:bg-canvas-alt hover:ring-slate-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]">
+        <ng-icon name="phosphorSignOut" size="17" />
+        Abmelden
+      </button>
+    </section>
+
+    <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6" aria-labelledby="demo-heading">
+      <h2 id="demo-heading" class="flex items-center gap-2 text-base font-bold tracking-tight text-ink">
+        <ng-icon name="phosphorSparkle" size="18" class="text-primary" />
+        Demo-Modus
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-muted">
+        Alle Daten sind Beispieldaten. Ihre Änderungen (Unterschriften, Tickets, Einstellungen) werden nur in diesem Browser gespeichert.
+      </p>
+      <button type="button" (click)="resetOpen.set(true)"
+        class="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold text-red-700 ring-1 ring-red-200 transition hover:bg-red-50 hover:ring-red-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]">
+        <ng-icon name="phosphorArrowCounterClockwise" size="17" />
+        Demodaten zurücksetzen
+      </button>
+    </section>
+  </aside>
+</div>
+
+<app-dialog [open]="resetOpen()" heading="Demodaten zurücksetzen?" (closed)="resetOpen.set(false)">
+  <p class="text-sm leading-relaxed text-muted">
+    Alle Unterschriften, neuen Tickets, Antworten und geänderten Einstellungen gehen verloren. Das Portal startet wieder mit den ursprünglichen Beispieldaten.
+  </p>
+  <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+    <button type="button" (click)="resetOpen.set(false)"
+      class="inline-flex min-h-12 items-center justify-center rounded-full px-5 text-sm font-semibold text-ink ring-1 ring-slate-300 transition hover:bg-canvas-alt hover:ring-slate-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]">
+      Abbrechen
+    </button>
+    <button type="button" (click)="resetDemo()"
+      class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]">
+      <ng-icon name="phosphorArrowCounterClockwise" size="18" />
+      Zurücksetzen
+    </button>
+  </div>
+</app-dialog>

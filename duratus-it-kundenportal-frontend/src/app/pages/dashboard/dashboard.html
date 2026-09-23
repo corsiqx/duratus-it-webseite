@@ -1,0 +1,219 @@
+<p class="text-sm text-muted sm:text-base">
+  {{ greeting }}, <span class="font-semibold text-ink">{{ store.account().name }}</span>. Hier ist der aktuelle Stand für {{ store.customer().name }}.
+</p>
+
+<!-- To-dos -->
+<section class="mt-5 rounded-2xl bg-canvas ring-1 ring-line" aria-labelledby="todo-heading">
+  <div class="flex items-center justify-between gap-3 px-5 pt-5 sm:px-6">
+    <h2 id="todo-heading" class="text-base font-bold tracking-tight text-ink">Handlungsbedarf</h2>
+    @if (actions().length > 0) {
+      <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800 tabular-nums">{{ actions().length }}</span>
+    }
+  </div>
+  @if (actions().length === 0) {
+    <p class="flex items-center gap-2.5 px-5 pt-3 pb-5 text-sm text-muted sm:px-6">
+      <ng-icon name="phosphorCheckCircle" size="19" class="text-teal-600" />
+      Alles erledigt. Es gibt gerade nichts, das auf Sie wartet.
+    </p>
+  } @else {
+    <ul class="mt-2 divide-y divide-line">
+      @for (item of actions(); track item.id) {
+        <li>
+          <a
+            [routerLink]="item.path"
+            [queryParams]="item.queryParams"
+            class="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-canvas-alt/70 focus-visible:bg-canvas-alt focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:gap-4 sm:px-6"
+          >
+            <span
+              class="flex size-10 shrink-0 items-center justify-center rounded-xl"
+              [class]="item.tone === 'critical' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700'"
+            >
+              <ng-icon [name]="item.icon" size="20" />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-semibold text-ink">{{ item.title }}</span>
+              <span class="mt-0.5 line-clamp-2 text-sm text-muted sm:line-clamp-1">{{ item.text }}</span>
+            </span>
+            <span class="hidden items-center gap-1 text-sm font-semibold text-primary group-hover:text-primary-hover sm:inline-flex">
+              {{ item.action }}
+              <ng-icon name="phosphorCaretRight" size="14" class="transition group-hover:translate-x-0.5" />
+            </span>
+            <span class="flex shrink-0 text-slate-300 sm:hidden"><ng-icon name="phosphorCaretRight" size="16" /></span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<!-- KPI tiles -->
+<ul class="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4 xl:grid-cols-4">
+  @for (kpi of kpis(); track kpi.label) {
+    <li>
+      <a
+        [routerLink]="kpi.path"
+        class="group flex h-full flex-col rounded-2xl bg-canvas p-4 ring-1 ring-line transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/5 hover:ring-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:hover:translate-y-0 sm:p-5"
+      >
+        <div class="flex items-center justify-between">
+          <span class="flex size-10 items-center justify-center rounded-xl" [class]="kpi.attention ? 'bg-amber-50 text-amber-700' : 'bg-primary-soft text-primary'">
+            <ng-icon [name]="kpi.icon" size="21" />
+          </span>
+          <ng-icon name="phosphorArrowRight" size="16" class="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-primary" />
+        </div>
+        <p class="mt-4 text-2xl font-bold tracking-tight text-ink tabular-nums sm:text-3xl">{{ kpi.value }}</p>
+        <p class="mt-0.5 text-sm font-medium text-ink">{{ kpi.label }}</p>
+        <p class="mt-1 flex items-center gap-1.5 text-xs text-muted">
+          @if (kpi.attention) {
+            <span class="size-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden="true"></span>
+          }
+          {{ kpi.detail }}
+        </p>
+      </a>
+    </li>
+  }
+</ul>
+
+<div class="mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-3">
+  <!-- Ticket volume -->
+  <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6 lg:col-span-2" aria-labelledby="chart-volume">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <h2 id="chart-volume" class="text-base font-bold tracking-tight text-ink">Ticket-Volumen, letzte 6 Monate</h2>
+      <p class="text-sm text-muted"><span class="font-semibold text-ink tabular-nums">{{ volumeTotal }}</span> Tickets gesamt</p>
+    </div>
+
+    <div class="mt-6 flex gap-3" aria-hidden="true">
+      <div class="flex h-44 flex-col justify-between pb-6 text-right text-xs text-slate-400 tabular-nums">
+        @for (tick of volumeTicks; track tick) {
+          <span class="leading-none">{{ tick }}</span>
+        }
+      </div>
+      <div class="relative flex-1">
+        <div class="pointer-events-none absolute inset-x-0 top-0 bottom-6 flex flex-col justify-between">
+          <span class="h-px bg-slate-100"></span>
+          <span class="h-px bg-slate-100"></span>
+          <span class="h-px bg-slate-200"></span>
+        </div>
+        <div class="relative flex h-44 items-stretch gap-0.5">
+          @for (item of volume; track item.month; let last = $last) {
+            <div class="group relative flex flex-1 flex-col items-center">
+              <div class="relative flex w-full flex-1 items-end justify-center">
+                <span
+                  class="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 -translate-y-2 rounded-lg bg-night px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
+                  [style.bottom.%]="(item.count / volumeMax) * 100"
+                >{{ item.month }}: {{ item.count }} Tickets</span>
+                @if (last) {
+                  <span
+                    class="absolute left-1/2 -translate-x-1/2 -translate-y-1 text-xs font-semibold text-ink tabular-nums transition-opacity group-hover:opacity-0"
+                    [style.bottom.%]="(item.count / volumeMax) * 100"
+                  >{{ item.count }}</span>
+                }
+                <span
+                  class="w-full max-w-10 rounded-t-[4px] transition-colors duration-150"
+                  [class]="last ? 'bg-primary group-hover:bg-primary-hover' : 'bg-blue-300 group-hover:bg-primary'"
+                  [style.height.%]="(item.count / volumeMax) * 100"
+                ></span>
+              </div>
+              <span class="flex h-6 items-end text-xs text-muted">{{ item.month }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <table class="sr-only">
+      <caption>Ticket-Volumen der letzten 6 Monate</caption>
+      <thead><tr><th scope="col">Monat</th><th scope="col">Tickets</th></tr></thead>
+      <tbody>
+        @for (item of volume; track item.month) {
+          <tr><td>{{ item.month }}</td><td>{{ item.count }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <!-- IT status -->
+  <section class="flex flex-col rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6" aria-labelledby="it-status">
+    <div class="flex items-center justify-between gap-3">
+      <h2 id="it-status" class="text-base font-bold tracking-tight text-ink">IT-Status</h2>
+      <a routerLink="/meine-it"
+        class="-mr-2 inline-flex min-h-10 items-center gap-1 rounded-full px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-soft hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-primary">
+        Details <ng-icon name="phosphorCaretRight" size="14" />
+      </a>
+    </div>
+    <ul class="mt-3 flex flex-col divide-y divide-line">
+      @for (item of store.serviceHealth(); track item.id) {
+        <li class="flex items-center gap-3 py-3">
+          <ng-icon [name]="item.icon" size="19" class="shrink-0 text-slate-400" />
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-semibold text-ink">{{ item.label }}</span>
+            <span class="block truncate text-xs text-muted">{{ item.summary }}</span>
+          </span>
+          <span class="flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted">
+            <span class="size-2 rounded-full" [class]="item.state === 'ok' ? 'bg-teal-500' : item.state === 'hinweis' ? 'bg-amber-500' : 'bg-red-500'" aria-hidden="true"></span>
+            {{ healthLabel[item.state].label }}
+          </span>
+        </li>
+      }
+    </ul>
+  </section>
+</div>
+
+<div class="mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-3">
+  <!-- Recent tickets -->
+  <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6 lg:col-span-2" aria-labelledby="recent-tickets">
+    <div class="flex items-center justify-between gap-3">
+      <h2 id="recent-tickets" class="text-base font-bold tracking-tight text-ink">Neueste Tickets</h2>
+      <a routerLink="/tickets"
+        class="-mr-2 inline-flex min-h-10 items-center gap-1 rounded-full px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary-soft hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-primary">
+        Alle ansehen <ng-icon name="phosphorCaretRight" size="14" />
+      </a>
+    </div>
+    <ul class="mt-2 divide-y divide-line">
+      @for (ticket of recentTickets(); track ticket.id) {
+        <li>
+          <a [routerLink]="['/tickets', ticket.id]"
+            class="group -mx-2 flex flex-col items-start gap-2 rounded-lg px-2 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-4 hover:bg-canvas-alt/70 focus-visible:outline-2 focus-visible:outline-primary">
+            <span class="min-w-0 max-w-full">
+              <span class="block text-sm font-semibold text-ink group-hover:text-primary-hover sm:truncate">{{ ticket.subject }}</span>
+              <span class="mt-0.5 block text-xs text-muted tabular-nums">{{ ticket.id }} · aktualisiert am {{ ticket.updated }}</span>
+            </span>
+            <app-status-badge [status]="ticketStatus[ticket.status]" />
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- Service team -->
+  <section class="relative isolate flex flex-col overflow-hidden rounded-2xl bg-night p-5 text-white sm:p-6" aria-labelledby="service-team">
+    <div class="absolute inset-0 -z-10 bg-linear-to-br from-brand-navy via-night to-night" aria-hidden="true"></div>
+    <div class="absolute -top-16 -right-16 -z-10 size-48 rounded-full bg-primary/25 blur-3xl" aria-hidden="true"></div>
+    <span class="flex size-11 items-center justify-center rounded-xl bg-white/10 text-primary-on-night">
+      <ng-icon name="phosphorLifebuoy" size="24" />
+    </span>
+    <h2 id="service-team" class="mt-5 text-lg font-bold tracking-tight">Ihr Service-Team</h2>
+    <p class="mt-2 text-sm leading-relaxed text-slate-300">Ein Ticket ist der schnellste Weg. Bei Ausfällen erreichen Sie uns auch direkt.</p>
+    <ul class="mt-4 flex flex-col gap-1 text-sm">
+      <li>
+        <a [href]="company.phoneHref" class="inline-flex min-h-10 items-center gap-2.5 rounded-lg text-slate-100 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-on-night">
+          <ng-icon name="phosphorPhone" size="17" class="text-primary-on-night" />{{ company.phone }}
+        </a>
+      </li>
+      <li>
+        <a [href]="'mailto:' + company.email" class="inline-flex min-h-10 items-center gap-2.5 rounded-lg text-slate-100 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-on-night">
+          <ng-icon name="phosphorEnvelopeSimple" size="17" class="text-primary-on-night" />{{ company.email }}
+        </a>
+      </li>
+      <li class="flex min-h-10 items-center gap-2.5 text-slate-400">
+        <ng-icon name="phosphorClock" size="17" />{{ company.serviceHours }}
+      </li>
+    </ul>
+    <div class="mt-6 lg:mt-auto lg:pt-6">
+      <a [routerLink]="['/tickets']" [queryParams]="{ neu: 1 }"
+        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-on-night active:scale-[0.98]">
+        <ng-icon name="phosphorPlus" size="17" />
+        Ticket erstellen
+      </a>
+    </div>
+  </section>
+</div>

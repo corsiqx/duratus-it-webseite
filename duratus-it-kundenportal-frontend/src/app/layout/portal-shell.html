@@ -1,0 +1,142 @@
+<a
+  href="#main"
+  class="sr-only z-[70] rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+  (click)="skipToMain($event)"
+>
+  Zum Inhalt springen
+</a>
+
+<div class="min-h-dvh lg:flex">
+  <!-- Backdrop for the off-canvas menu (phones and tablets). -->
+  @if (menuOpen()) {
+    <button
+      type="button"
+      tabindex="-1"
+      aria-hidden="true"
+      class="fixed inset-0 z-40 animate-[fade-in_0.3s_var(--ease-out-expo)_both] bg-slate-950/50 lg:hidden"
+      (click)="closeMenu()"
+    ></button>
+  }
+
+  <aside
+    id="portal-sidebar"
+    class="fixed inset-y-0 left-0 z-50 flex w-[min(19rem,85vw)] flex-col bg-night text-slate-300 transition-transform duration-300 ease-out-expo motion-reduce:transition-none lg:sticky lg:top-0 lg:z-auto lg:h-dvh lg:w-64 lg:shrink-0 lg:translate-x-0"
+    [class]="menuOpen() ? 'translate-x-0 shadow-2xl shadow-black/40' : '-translate-x-full'"
+    [attr.inert]="!isDesktop() && !menuOpen() ? '' : null"
+    aria-label="Portal-Navigation"
+  >
+    <div class="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-white/10 pr-2 pl-5">
+      <a routerLink="/uebersicht" class="flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-on-night">
+        <app-brand-mark tone="onDark" />
+        <span class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[0.6875rem] font-semibold tracking-wide text-slate-300">Kundenportal</span>
+      </a>
+      <button
+        #sidebarClose
+        type="button"
+        class="flex size-11 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-primary-on-night lg:hidden"
+        (click)="closeMenu()"
+      >
+        <ng-icon name="phosphorX" size="20" />
+        <span class="sr-only">Menü schließen</span>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto overscroll-contain px-3 py-4" aria-label="Bereiche">
+      @for (group of nav; track $index) {
+        <div [class.mt-5]="!$first">
+          @if (group.label) {
+            <p class="px-4 pb-1.5 text-[0.6875rem] font-semibold tracking-wider text-slate-500 uppercase" [id]="'nav-group-' + $index">
+              {{ group.label }}
+            </p>
+          }
+          <ul class="flex flex-col gap-1" [attr.aria-labelledby]="group.label ? 'nav-group-' + $index : null">
+            @for (item of group.items; track item.path) {
+              <li>
+                <a
+                  [routerLink]="item.path"
+                  routerLinkActive
+                  #rla="routerLinkActive"
+                  [attr.aria-current]="rla.isActive ? 'page' : null"
+                  class="group flex min-h-11 items-center gap-3 rounded-full px-4 text-sm font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-on-night"
+                  [class]="rla.isActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'"
+                >
+                  <ng-icon
+                    [name]="item.icon"
+                    size="19"
+                    class="shrink-0 transition-colors"
+                    [class]="rla.isActive ? 'text-primary-on-night' : 'text-slate-500 group-hover:text-slate-300'"
+                  />
+                  <span class="flex-1">{{ item.label }}</span>
+                  @if (item.badge && badges()[item.badge] > 0) {
+                    <span
+                      class="flex min-w-5 items-center justify-center rounded-full px-1.5 text-[0.6875rem] leading-5 font-bold tabular-nums"
+                      [class]="item.badge === 'invoices' ? 'bg-red-500/20 text-red-300' : 'bg-amber-400/20 text-amber-200'"
+                    >
+                      {{ badges()[item.badge] }}
+                      <span class="sr-only">{{ item.badge === 'invoices' ? 'überfällig' : 'offen' }}</span>
+                    </span>
+                  }
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </nav>
+
+    <div class="shrink-0 border-t border-white/10 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <a
+        routerLink="/konto"
+        routerLinkActive="bg-white/10"
+        class="flex items-center gap-3 rounded-2xl bg-white/5 p-3 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-primary-on-night"
+      >
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white" aria-hidden="true">
+          {{ accountInitials() }}
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-sm font-semibold text-white">{{ store.account().name }}</span>
+          <span class="block truncate text-xs text-slate-400">{{ store.customer().name }}</span>
+        </span>
+        <ng-icon name="phosphorGear" size="18" class="shrink-0 text-slate-500" />
+        <span class="sr-only">Mein Konto</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header class="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur-xl supports-[backdrop-filter]:bg-canvas/75">
+      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <div class="flex min-w-0 items-center gap-1">
+          <button
+            #menuButton
+            type="button"
+            class="-ml-2.5 flex size-11 shrink-0 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary lg:hidden"
+            aria-controls="portal-sidebar"
+            [attr.aria-expanded]="menuOpen()"
+            (click)="openMenu()"
+          >
+            <ng-icon name="phosphorList" size="22" />
+            <span class="sr-only">Menü öffnen</span>
+          </button>
+          <h1 class="truncate text-lg font-bold tracking-tight text-ink sm:text-xl">{{ heading() }}</h1>
+        </div>
+
+        <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <app-notifications-panel />
+          <button
+            type="button"
+            class="flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-semibold text-slate-700 ring-1 ring-line transition hover:bg-canvas-alt hover:ring-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98] sm:px-4"
+            (click)="logout()"
+          >
+            <ng-icon name="phosphorSignOut" size="18" />
+            <span class="sr-only sm:not-sr-only">Abmelden</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main #main id="main" tabindex="-1" class="mx-auto w-full max-w-7xl flex-1 px-4 pt-6 pb-16 outline-none sm:px-6 sm:pt-8 lg:px-8">
+      <router-outlet />
+    </main>
+  </div>
+</div>

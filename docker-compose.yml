@@ -1,21 +1,72 @@
 services:
-  frontend:
+  dt:
     build:
       context: .
       dockerfile: ./duratus-it-frontend/Dockerfile
       args:
         c: production
-    container_name: duratus-it-frontend
+
+    container_name: duratus-it
+
     ports:
       - "127.0.0.1:11001:80"
-    restart: always
-    networks:
-      - duratus-it-frontend_network
 
-volumes:
-  duratus-it-frontend-postgres-data:
-    driver: local
+    restart: always
+
+    networks:
+      - duratus-it-network
+
+  dt-kb:
+    build:
+      context: .
+      dockerfile: ./duratus-it-knowledgebaseb-frontend/Dockerfile
+      args:
+        c: production
+
+    container_name: duratus-it-knowledgebaseb
+
+    ports:
+      - "127.0.0.1:11002:80"
+
+    restart: always
+
+    networks:
+      - duratus-it-network
+
+  dt-kp:
+    build:
+      context: .
+      dockerfile: ./duratus-it-kundenportal-frontend/Dockerfile
+      args:
+        c: production
+
+    container_name: duratus-it-kundenportal
+
+    ports:
+      - "127.0.0.1:11003:80"
+
+    restart: always
+
+    networks:
+      - duratus-it-network
+
+  dt-shop:
+    build:
+      context: .
+      dockerfile: ./duratus-it-shop-frontend/Dockerfile
+      args:
+        c: production
+
+    container_name: duratus-it-shop
+
+    ports:
+      - "127.0.0.1:11004:80"
+
+    restart: always
+
+    networks:
+      - duratus-it-network
 
 networks:
-  duratus-it-frontend_network:
+  duratus-it-network:
     driver: bridge

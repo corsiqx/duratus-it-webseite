@@ -1,0 +1,127 @@
+<!-- Totals -->
+<dl class="grid grid-cols-3 gap-2 sm:gap-4">
+  <div class="min-w-0 rounded-2xl bg-canvas p-3 ring-1 ring-line sm:p-5">
+    <dt class="flex items-center gap-1.5 text-xs text-muted sm:gap-2 sm:text-sm"><span class="size-2 shrink-0 rounded-full bg-blue-600" aria-hidden="true"></span>Offen</dt>
+    <dd class="mt-1 text-sm font-bold tracking-tight text-ink tabular-nums min-[400px]:text-base sm:text-2xl">{{ euroCents(totals().offen) }}</dd>
+  </div>
+  <div class="min-w-0 rounded-2xl bg-canvas p-3 ring-1 sm:p-5" [class]="totals().ueberfaellig > 0 ? 'ring-red-200' : 'ring-line'">
+    <dt class="flex items-center gap-1.5 text-xs text-muted sm:gap-2 sm:text-sm"><span class="size-2 shrink-0 rounded-full bg-red-600" aria-hidden="true"></span>Überfällig</dt>
+    <dd class="mt-1 text-sm font-bold tracking-tight tabular-nums min-[400px]:text-base sm:text-2xl" [class]="totals().ueberfaellig > 0 ? 'text-red-700' : 'text-ink'">{{ euroCents(totals().ueberfaellig) }}</dd>
+  </div>
+  <div class="min-w-0 rounded-2xl bg-canvas p-3 ring-1 ring-line sm:p-5">
+    <dt class="flex items-center gap-1.5 text-xs text-muted sm:gap-2 sm:text-sm"><span class="size-2 shrink-0 rounded-full bg-teal-600" aria-hidden="true"></span>Bezahlt</dt>
+    <dd class="mt-1 text-sm font-bold tracking-tight text-ink tabular-nums min-[400px]:text-base sm:text-2xl">{{ euroCents(totals().bezahlt) }}</dd>
+  </div>
+</dl>
+
+@if (store.overdueInvoices().length > 0) {
+  <div class="mt-4 flex flex-col gap-3 rounded-2xl bg-red-50 p-4 text-sm text-red-900 ring-1 ring-red-200 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+    <p class="flex items-start gap-2.5">
+      <ng-icon name="phosphorWarningCircle" size="19" class="mt-0.5 shrink-0 text-red-600" />
+      <span>
+        <span class="font-semibold">{{ store.overdueInvoices().length === 1 ? '1 Rechnung ist' : store.overdueInvoices().length + ' Rechnungen sind' }} überfällig.</span>
+        Bitte prüfen Sie den Zahlungseingang. Bei Fragen zur Rechnung helfen wir gern.
+      </span>
+    </p>
+    <a
+      [routerLink]="['/tickets']"
+      [queryParams]="{ neu: 1, betreff: 'Frage zu Rechnung ' + store.overdueInvoices()[0].id, kategorie: 'sonstiges' }"
+      class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-canvas px-4 font-semibold text-red-800 ring-1 ring-red-300 transition hover:ring-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]"
+    >
+      <ng-icon name="phosphorChatCircleText" size="17" />
+      Frage zur Rechnung
+    </a>
+  </div>
+}
+
+<div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <app-filter-tabs label="Rechnungen filtern" [options]="filterOptions()" [(value)]="filter" />
+  <label class="relative block sm:w-72">
+    <span class="sr-only">Rechnungen durchsuchen</span>
+    <ng-icon name="phosphorMagnifyingGlass" size="18" class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400" />
+    <input
+      type="search"
+      placeholder="Nummer oder Monat"
+      class="min-h-11 w-full rounded-full border border-slate-300 bg-canvas py-2 pr-4 pl-10 text-base text-ink transition outline-none placeholder:text-slate-400 hover:border-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/15 sm:text-sm"
+      [value]="query()"
+      (input)="query.set($any($event.target).value)"
+    />
+  </label>
+</div>
+
+@if (visibleInvoices().length === 0) {
+  <div class="mt-5 flex flex-col items-center rounded-2xl bg-canvas px-6 py-14 text-center ring-1 ring-line">
+    <span class="flex size-12 items-center justify-center rounded-full bg-canvas-alt text-slate-400">
+      <ng-icon name="phosphorReceipt" size="24" />
+    </span>
+    <p class="mt-4 font-semibold text-ink">Keine Rechnungen gefunden</p>
+    <p class="mt-1 text-sm text-muted">Passen Sie Filter oder Suche an.</p>
+  </div>
+} @else {
+  <!-- Desktop table -->
+  <div class="mt-5 hidden overflow-hidden rounded-2xl bg-canvas ring-1 ring-line md:block">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-line bg-canvas-alt text-xs font-semibold text-muted">
+        <tr>
+          <th scope="col" class="px-5 py-3">Rechnungsnr.</th>
+          <th scope="col" class="px-5 py-3">Datum</th>
+          <th scope="col" class="px-5 py-3">Beschreibung</th>
+          <th scope="col" class="px-5 py-3 text-right">Betrag (brutto)</th>
+          <th scope="col" class="px-5 py-3">Status</th>
+          <th scope="col" class="px-5 py-3"><span class="sr-only">Aktionen</span></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-line">
+        @for (invoice of visibleInvoices(); track invoice.id) {
+          <tr class="transition-colors hover:bg-canvas-alt/60">
+            <td class="px-5 py-4 font-semibold whitespace-nowrap text-ink tabular-nums">{{ invoice.id }}</td>
+            <td class="px-5 py-4 whitespace-nowrap text-muted tabular-nums">{{ invoice.date }}</td>
+            <td class="px-5 py-4 text-ink">{{ invoice.description }}</td>
+            <td class="px-5 py-4 text-right font-semibold whitespace-nowrap text-ink tabular-nums">{{ euroCents(invoice.amount) }}</td>
+            <td class="px-5 py-4"><app-status-badge [status]="statusLabel[invoice.status]" /></td>
+            <td class="px-5 py-3 text-right">
+              <ng-container *ngTemplateOutlet="download; context: { $implicit: invoice }" />
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phone list -->
+  <ul class="mt-5 flex flex-col gap-3 md:hidden">
+    @for (invoice of visibleInvoices(); track invoice.id) {
+      <li class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-ink tabular-nums">{{ invoice.id }}</p>
+            <p class="mt-0.5 text-sm text-muted">{{ invoice.description }}</p>
+          </div>
+          <app-status-badge [status]="statusLabel[invoice.status]" />
+        </div>
+        <div class="mt-4 flex items-end justify-between gap-3">
+          <div>
+            <p class="text-lg font-bold tracking-tight text-ink tabular-nums">{{ euroCents(invoice.amount) }}</p>
+            <p class="text-xs text-muted tabular-nums">vom {{ invoice.date }}</p>
+          </div>
+          <ng-container *ngTemplateOutlet="download; context: { $implicit: invoice }" />
+        </div>
+      </li>
+    }
+  </ul>
+}
+
+<p class="mt-4 text-xs text-muted">Alle Rechnungen werden zusätzlich an {{ store.billing().email }} gesendet.</p>
+
+<ng-template #download let-invoice>
+  <button
+    type="button"
+    class="inline-flex min-h-10 items-center gap-2 rounded-full bg-primary-soft px-4 text-sm font-semibold text-primary-hover transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+    [disabled]="busy() === invoice.id"
+    (click)="downloadPdf(invoice)"
+  >
+    <ng-icon [name]="busy() === invoice.id ? 'phosphorCircleNotch' : 'phosphorDownloadSimple'" size="16" [class.animate-spin]="busy() === invoice.id" />
+    PDF
+    <span class="sr-only">von Rechnung {{ invoice.id }} herunterladen</span>
+  </button>
+</ng-template>
