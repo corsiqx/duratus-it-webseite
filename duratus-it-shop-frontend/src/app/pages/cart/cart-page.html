@@ -1,0 +1,272 @@
+<app-page-hero [crumbs]="crumbs" title="Warenkorb" [lead]="lead()">
+  @if (!store.isEmpty()) {
+    <button
+      type="button"
+      class="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+      (click)="clearOpen.set(true)"
+    >
+      <ng-icon name="phosphorTrash" size="16" />
+      Warenkorb leeren
+    </button>
+  }
+</app-page-hero>
+
+<div class="bg-canvas-alt py-8 sm:py-12">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    @if (store.isEmpty()) {
+      <app-empty-state icon="phosphorShoppingCartSimple" title="Der Warenkorb ist leer" hint="Stöbern Sie im Katalog oder legen Sie ein fertiges Set in einem Klick hinein.">
+        <div class="mt-5 flex flex-col gap-2 sm:flex-row">
+          <a routerLink="/katalog" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover">
+            Zum Katalog
+            <ng-icon name="phosphorArrowRight" size="16" />
+          </a>
+          <a routerLink="/merkliste" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-canvas px-5 text-sm font-semibold text-ink ring-1 ring-line transition hover:bg-canvas-alt">
+            Merkliste ansehen ({{ store.wishlistIds().length }})
+          </a>
+        </div>
+      </app-empty-state>
+    } @else {
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+        <!-- Lines -->
+        <div class="min-w-0 lg:col-span-8">
+          @if (oneOffLines().length) {
+            <section aria-labelledby="goods-heading">
+              <h2 id="goods-heading" class="text-lg font-bold text-ink">Einmalige Positionen</h2>
+              <ul class="mt-3 flex flex-col gap-3">
+                @for (line of oneOffLines(); track line.productId) {
+                  <li class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+                    <ng-container [ngTemplateOutlet]="lineTemplate" [ngTemplateOutletContext]="{ line }" />
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
+          @if (recurringLines().length) {
+            <section class="mt-8" aria-labelledby="recurring-heading">
+              <h2 id="recurring-heading" class="text-lg font-bold text-ink">Monatliche Lizenzen</h2>
+              <p class="mt-1 max-w-[62ch] text-sm text-muted">
+                Diese Positionen werden nicht geliefert, sondern monatlich auf Ihrer Sammelrechnung geführt. Sie zählen
+                nicht in den Versandkosten mit.
+              </p>
+              <ul class="mt-3 flex flex-col gap-3">
+                @for (line of recurringLines(); track line.productId) {
+                  <li class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+                    <ng-container [ngTemplateOutlet]="lineTemplate" [ngTemplateOutletContext]="{ line }" />
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
+          <a routerLink="/katalog" class="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover">
+            <ng-icon name="phosphorArrowLeft" size="16" />
+            Weiter einkaufen
+          </a>
+        </div>
+
+        <!-- Summary -->
+        <aside class="lg:col-span-4">
+          <div class="sticky top-32 flex flex-col gap-4">
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="summary-heading">
+              <h2 id="summary-heading" class="text-lg font-bold text-ink">Zusammenfassung</h2>
+
+              <dl class="mt-4 flex flex-col gap-2 text-sm">
+                <div class="flex items-baseline justify-between gap-4">
+                  <dt class="text-muted">Warenwert (netto)</dt>
+                  <dd class="font-semibold text-ink tabular-nums">{{ euroCents(store.goodsNet()) }}</dd>
+                </div>
+                @if (store.tierSaving() > 0) {
+                  <div class="flex items-baseline justify-between gap-4 text-teal-700">
+                    <dt>Staffelvorteil</dt>
+                    <dd class="font-semibold tabular-nums">− {{ euroCents(store.tierSaving()) }}</dd>
+                  </div>
+                }
+                <div class="flex items-baseline justify-between gap-4">
+                  <dt class="text-muted">Versand ({{ deliveryLabel() }})</dt>
+                  <dd class="font-semibold text-ink tabular-nums">
+                    {{ shipping() === 0 ? 'kostenfrei' : euroCents(shipping()) }}
+                  </dd>
+                </div>
+                <div class="flex items-baseline justify-between gap-4 border-t border-line pt-2">
+                  <dt class="text-muted">Zwischensumme (netto)</dt>
+                  <dd class="font-semibold text-ink tabular-nums">{{ euroCents(netTotal()) }}</dd>
+                </div>
+                <div class="flex items-baseline justify-between gap-4">
+                  <dt class="text-muted">19 % MwSt.</dt>
+                  <dd class="font-semibold text-ink tabular-nums">{{ euroCents(vat()) }}</dd>
+                </div>
+                <div class="mt-1 flex items-baseline justify-between gap-4 border-t border-line pt-3">
+                  <dt class="font-bold text-ink">Gesamt (brutto)</dt>
+                  <dd class="text-xl font-bold text-ink tabular-nums">{{ euroCents(grossTotal()) }}</dd>
+                </div>
+                @if (store.monthlyNet() > 0) {
+                  <div class="mt-2 flex items-baseline justify-between gap-4 rounded-lg bg-primary-soft px-3 py-2">
+                    <dt class="font-semibold text-primary">zusätzlich monatlich (netto)</dt>
+                    <dd class="font-bold text-primary tabular-nums">{{ euroCents(store.monthlyNet()) }}</dd>
+                  </div>
+                }
+              </dl>
+
+              <!-- Free shipping progress -->
+              @if (oneOffLines().length) {
+                <div class="mt-5 border-t border-line pt-4">
+                  @if (store.missingForFreeShipping() > 0) {
+                    <p class="text-sm text-muted">
+                      Noch <span class="font-semibold text-ink">{{ euroCents(store.missingForFreeShipping()) }}</span> bis zum
+                      kostenfreien Versand.
+                    </p>
+                  } @else {
+                    <p class="flex items-center gap-2 text-sm font-medium text-teal-700">
+                      <ng-icon name="phosphorCheckCircle" size="16" />
+                      Versandkostenfrei erreicht.
+                    </p>
+                  }
+                  <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-canvas-alt" role="presentation">
+                    <div class="h-full rounded-full bg-primary transition-[width] duration-500 ease-out-expo" [style.width.%]="freeShippingProgress()"></div>
+                  </div>
+                </div>
+              }
+
+              <div class="mt-5 flex flex-col gap-2">
+                <a
+                  routerLink="/kasse"
+                  class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+                >
+                  {{ store.hasQuoteOnly() ? 'Weiter zum Angebot' : 'Zur Kasse' }}
+                  <ng-icon name="phosphorArrowRight" size="16" />
+                </a>
+                <a
+                  routerLink="/kasse"
+                  [queryParams]="{ art: 'angebot' }"
+                  class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-canvas px-5 text-sm font-semibold text-ink ring-1 ring-line transition hover:bg-canvas-alt"
+                >
+                  <ng-icon name="phosphorFileText" size="16" />
+                  Angebot anfordern
+                </a>
+              </div>
+
+              @if (store.hasQuoteOnly()) {
+                <p class="mt-4 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-600/20">
+                  <ng-icon name="phosphorInfo" size="16" class="mt-0.5 shrink-0" />
+                  <span>
+                    Der Warenkorb enthält einen Artikel, der nur über ein Angebot geht. Dieser Vorgang wird daher als
+                    Angebot erstellt, nicht als Bestellung.
+                  </span>
+                </p>
+              }
+
+              <p class="mt-4 text-xs text-slate-400">
+                Lieferung voraussichtlich komplett am {{ store.expectedDelivery() }}. Teillieferung auf Wunsch.
+              </p>
+            </section>
+
+            <!-- Delivery option already selectable here, the checkout keeps it. -->
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="delivery-heading">
+              <h2 id="delivery-heading" class="text-sm font-semibold text-ink">Versandart</h2>
+              <ul class="mt-3 flex flex-col gap-2">
+                @for (option of deliveryOptions; track option.id) {
+                  <li>
+                    <label class="flex cursor-pointer items-start gap-3 rounded-xl p-2.5 ring-1 transition-colors has-checked:bg-primary-soft has-checked:ring-primary/30 has-focus-visible:outline-2 has-focus-visible:outline-primary" [class]="store.delivery() === option.id ? 'ring-primary/30' : 'ring-line hover:bg-canvas-alt'">
+                      <input type="radio" name="versandart" class="mt-1 size-4 shrink-0 text-primary" [value]="option.id" [checked]="store.delivery() === option.id" (change)="store.setDelivery(option.id)" />
+                      <span class="min-w-0">
+                        <span class="block text-sm font-semibold text-ink">{{ option.label }}</span>
+                        <span class="mt-0.5 block text-xs leading-snug text-muted">{{ option.text }}</span>
+                      </span>
+                    </label>
+                  </li>
+                }
+              </ul>
+            </section>
+          </div>
+        </aside>
+      </div>
+    }
+  </div>
+</div>
+
+<app-dialog
+  [open]="clearOpen()"
+  heading="Warenkorb leeren?"
+  subheading="Alle Positionen werden entfernt. Die Merkliste bleibt unberührt."
+  (closed)="clearOpen.set(false)"
+>
+  <div class="flex flex-col gap-2 sm:flex-row-reverse">
+    <button
+      type="button"
+      class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700"
+      (click)="clearCart()"
+    >
+      <ng-icon name="phosphorTrash" size="16" />
+      Ja, leeren
+    </button>
+    <button
+      type="button"
+      class="inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-canvas px-5 text-sm font-semibold text-ink ring-1 ring-line transition hover:bg-canvas-alt"
+      (click)="clearOpen.set(false)"
+    >
+      Abbrechen
+    </button>
+  </div>
+</app-dialog>
+
+<!-- One cart line: card on phones, row from md upwards. -->
+<ng-template #lineTemplate let-line="line">
+  <div class="flex gap-4">
+    <a [routerLink]="['/artikel', line.slug]" class="shrink-0">
+      @if (productOf(line.productId); as product) {
+        <app-product-image
+          [product]="product"
+          prefer="thumb"
+          class="size-20 overflow-hidden rounded-xl bg-canvas-alt p-1.5 sm:size-24"
+          imageClass="size-full object-contain"
+        />
+      }
+    </a>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold tracking-wide text-muted uppercase">{{ line.manufacturer }}</p>
+          <h3 class="mt-0.5 leading-snug font-bold text-ink">
+            <a [routerLink]="['/artikel', line.slug]" class="transition-colors hover:text-primary">{{ line.name }}</a>
+          </h3>
+          <p class="mt-0.5 text-sm text-muted">{{ line.subtitle }}</p>
+          <p class="mt-1 font-mono text-xs text-slate-400">{{ line.mpn }}</p>
+        </div>
+        <p class="shrink-0 text-right">
+          <span class="block text-lg font-bold text-ink tabular-nums">{{ euroCents(line.lineTotal) }}</span>
+          <span class="block text-xs text-muted tabular-nums">{{ euroCents(line.unitPrice) }} je {{ line.unit }}</span>
+          @if (line.tierSaving > 0) {
+            <span class="mt-0.5 block text-xs font-semibold text-teal-700 tabular-nums">Staffel: − {{ euroCents(line.tierSaving) }}</span>
+          }
+        </p>
+      </div>
+
+      <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <app-quantity-stepper [value]="line.quantity" (valueChange)="store.setQuantity(line.productId, $event)" [label]="'Menge ' + line.name" />
+        <button
+          type="button"
+          class="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-muted transition-colors hover:bg-canvas-alt hover:text-ink"
+          (click)="moveToWishlist(line)"
+        >
+          <ng-icon name="phosphorBookmarkSimple" size="16" />
+          Auf die Merkliste
+        </button>
+        <button
+          type="button"
+          class="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-muted transition-colors hover:bg-red-50 hover:text-red-700"
+          (click)="remove(line)"
+        >
+          <ng-icon name="phosphorTrash" size="16" />
+          Entfernen
+        </button>
+        @if (line.quoteOnly) {
+          <span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900 ring-1 ring-amber-600/20 ring-inset">
+            nur auf Angebot
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+</ng-template>

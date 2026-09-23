@@ -1,0 +1,249 @@
+<app-page-hero [crumbs]="crumbs()" [title]="heading()" [lead]="lead()">
+  <dl class="flex gap-6 text-sm">
+    <div>
+      <dt class="text-slate-400">Artikel</dt>
+      <dd class="mt-0.5 text-2xl font-bold text-white tabular-nums">{{ results().length }}</dd>
+    </div>
+    <div>
+      <dt class="text-slate-400">Ab Lager</dt>
+      <dd class="mt-0.5 text-2xl font-bold text-white tabular-nums">{{ inStockCount() }}</dd>
+    </div>
+  </dl>
+</app-page-hero>
+
+<div class="bg-canvas-alt py-8 sm:py-12">
+  <div class="mx-auto flex max-w-7xl gap-8 px-4 sm:px-6 lg:px-8">
+    <!-- Filter column on large screens. -->
+    <aside class="hidden w-64 shrink-0 lg:block">
+      <div class="sticky top-32 flex flex-col gap-5">
+        <ng-container [ngTemplateOutlet]="filters" />
+      </div>
+    </aside>
+
+    <div class="min-w-0 flex-1">
+      <!-- Toolbar: count, sort, filter button on phones. -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm text-muted">
+          <span class="font-semibold text-ink tabular-nums">{{ results().length }}</span>
+          von {{ totalCount }} Artikeln
+        </p>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="inline-flex min-h-11 items-center gap-2 rounded-full bg-canvas px-4 text-sm font-semibold text-ink ring-1 ring-line transition-colors hover:bg-canvas lg:hidden"
+            (click)="filterDialogOpen.set(true)"
+          >
+            <ng-icon name="phosphorFunnel" size="16" />
+            Filter
+            @if (activeFilterCount()) {
+              <span class="rounded-full bg-primary px-1.5 text-xs leading-5 text-white tabular-nums">{{ activeFilterCount() }}</span>
+            }
+          </button>
+          <div
+            class="relative inline-flex min-h-11 items-center gap-2 rounded-full bg-canvas pr-9 pl-4 text-sm ring-1 ring-line focus-within:ring-2 focus-within:ring-primary"
+          >
+            <label for="katalog-sortierung" class="shrink-0 text-muted">Sortierung</label>
+            <select
+              id="katalog-sortierung"
+              class="min-h-11 w-full cursor-pointer appearance-none bg-transparent pr-1 text-sm font-semibold text-ink outline-none"
+              [value]="sort()"
+              (change)="onSort($event)"
+            >
+              @for (option of sortOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <ng-icon name="phosphorCaretDown" size="14" class="pointer-events-none absolute right-3.5 text-muted" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Active filters as removable chips. -->
+      @if (activeChips().length) {
+        <ul class="mt-4 flex flex-wrap items-center gap-2">
+          @for (chip of activeChips(); track chip.label) {
+            <li>
+              <button
+                type="button"
+                class="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-primary-soft px-3 text-sm font-medium text-primary transition-colors hover:bg-blue-100"
+                (click)="chip.clear()"
+              >
+                {{ chip.label }}
+                <ng-icon name="phosphorX" size="12" />
+              </button>
+            </li>
+          }
+          <li>
+            <button type="button" class="min-h-9 rounded-full px-3 text-sm font-semibold text-muted underline-offset-4 hover:underline" (click)="resetFilters()">
+              Alle Filter zurücksetzen
+            </button>
+          </li>
+        </ul>
+      }
+
+      @if (results().length) {
+        <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          @for (product of results(); track product.id; let i = $index) {
+            <li appReveal [revealDelay]="i % 3"><app-product-card [product]="product" [showCategory]="!categoryId()" /></li>
+          }
+        </ul>
+      } @else {
+        <app-empty-state
+          class="mt-6"
+          icon="phosphorPackage"
+          title="Kein Artikel passt zu dieser Auswahl"
+          hint="Nehmen Sie einen Filter heraus oder schreiben Sie uns, was gesucht wird. Wir holen es aus den Preislisten der Distributoren."
+        >
+          <div class="mt-5 flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+              (click)="resetFilters()"
+            >
+              Filter zurücksetzen
+            </button>
+            <a
+              [href]="'mailto:' + company.shopEmail"
+              class="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-canvas px-5 text-sm font-semibold text-ink ring-1 ring-line transition hover:bg-canvas-alt"
+            >
+              Artikel anfragen
+            </a>
+          </div>
+        </app-empty-state>
+      }
+
+      <!-- Category text at the end, so the articles come first. -->
+      @if (category()) {
+        <section class="mt-12 rounded-2xl bg-canvas p-6 ring-1 ring-line sm:p-8">
+          <h2 class="text-lg font-bold text-ink">{{ category()!.name }} bei Duratus IT</h2>
+          <p class="mt-2 max-w-[70ch] leading-relaxed text-muted">{{ category()!.text }}</p>
+          <div class="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-5">
+            <span class="flex size-10 items-center justify-center rounded-full bg-primary-soft text-primary">
+              <ng-icon name="phosphorGearSix" size="20" />
+            </span>
+            <p class="min-w-0 flex-1 text-sm text-muted">
+              Betrieb dazu:
+              <span class="font-semibold text-ink">{{ category()!.serviceLabel }}</span>
+            </p>
+            <a
+              [href]="website.managedServices + '#' + category()!.serviceId"
+              class="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-canvas-alt px-4 text-sm font-semibold text-ink transition-colors hover:bg-slate-100"
+            >
+              Linie ansehen
+              <ng-icon name="phosphorArrowUpRight" size="13" class="opacity-60" />
+            </a>
+          </div>
+        </section>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Filter sheet on phones and tablets. -->
+<app-dialog [open]="filterDialogOpen()" heading="Filter" subheading="Auswahl gilt sofort." (closed)="filterDialogOpen.set(false)">
+  <div class="flex flex-col gap-5">
+    <ng-container [ngTemplateOutlet]="filters" />
+    <button
+      type="button"
+      class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+      (click)="filterDialogOpen.set(false)"
+    >
+      {{ results().length }} Artikel anzeigen
+    </button>
+  </div>
+</app-dialog>
+
+<!-- One filter block, used in the sidebar and in the sheet. -->
+<ng-template #filters>
+  <section class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+    <h2 class="text-sm font-semibold text-ink">Kategorie</h2>
+    <ul class="mt-2 flex flex-col">
+      <li>
+        <a
+          routerLink="/katalog"
+          [queryParams]="keptQueryParams()"
+          class="flex min-h-10 items-center justify-between gap-2 rounded-lg px-2 text-sm transition-colors hover:bg-canvas-alt"
+          [class]="!categoryId() ? 'font-semibold text-primary' : 'text-muted'"
+        >
+          Alle Artikel
+          <span class="text-xs tabular-nums">{{ totalCount }}</span>
+        </a>
+      </li>
+      @for (entry of categories; track entry.id) {
+        <li>
+          <a
+            [routerLink]="['/katalog', entry.slug]"
+            [queryParams]="keptQueryParams()"
+            class="flex min-h-10 items-center justify-between gap-2 rounded-lg px-2 text-sm transition-colors hover:bg-canvas-alt"
+            [class]="categoryId() === entry.id ? 'font-semibold text-primary' : 'text-muted'"
+          >
+            <span class="min-w-0 truncate">{{ entry.name }}</span>
+            <span class="text-xs tabular-nums">{{ categoryCounts[entry.id] }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+    <h2 class="text-sm font-semibold text-ink">Hersteller</h2>
+    <ul class="mt-2 flex flex-col">
+      @for (name of manufacturerOptions(); track name) {
+        <li>
+          <label class="flex min-h-10 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm transition-colors hover:bg-canvas-alt">
+            <input
+              type="checkbox"
+              class="size-4 shrink-0 rounded border-line text-primary focus-visible:outline-2 focus-visible:outline-primary"
+              [checked]="manufacturers().includes(name)"
+              (change)="toggleManufacturer(name)"
+            />
+            <span class="min-w-0 flex-1 truncate" [class]="manufacturers().includes(name) ? 'font-semibold text-ink' : 'text-muted'">{{ name }}</span>
+            <span class="shrink-0 text-xs text-slate-400 tabular-nums">{{ manufacturerCounts()[name] }}</span>
+          </label>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+    <h2 class="text-sm font-semibold text-ink">Preis bis</h2>
+    <label for="max-price" class="sr-only">Höchster Nettopreis</label>
+    <input
+      id="max-price"
+      type="range"
+      class="mt-3 w-full accent-primary"
+      [min]="priceBounds().min"
+      [max]="priceBounds().max"
+      step="50"
+      [value]="maxPrice() || priceBounds().max"
+      (input)="onMaxPrice($event)"
+    />
+    <p class="mt-1 flex items-baseline justify-between text-sm">
+      <span class="text-muted">{{ euro(priceBounds().min) }}</span>
+      <span class="font-semibold text-ink tabular-nums">bis {{ euro(maxPrice() || priceBounds().max) }}</span>
+    </p>
+    <p class="mt-1 text-xs text-muted">Nettopreis je Stück oder je Monat.</p>
+  </section>
+
+  <section class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+    <h2 class="text-sm font-semibold text-ink">Verfügbarkeit</h2>
+    <label class="mt-2 flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm transition-colors hover:bg-canvas-alt">
+      <input
+        type="checkbox"
+        class="size-4 shrink-0 rounded border-line text-primary focus-visible:outline-2 focus-visible:outline-primary"
+        [checked]="inStockOnly()"
+        (change)="toggleInStock()"
+      />
+      <span [class]="inStockOnly() ? 'font-semibold text-ink' : 'text-muted'">Nur ab Lager</span>
+    </label>
+    <label class="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg px-2 text-sm transition-colors hover:bg-canvas-alt">
+      <input
+        type="checkbox"
+        class="size-4 shrink-0 rounded border-line text-primary focus-visible:outline-2 focus-visible:outline-primary"
+        [checked]="buyableOnly()"
+        (change)="toggleBuyable()"
+      />
+      <span [class]="buyableOnly() ? 'font-semibold text-ink' : 'text-muted'">Ohne Angebotsartikel</span>
+    </label>
+  </section>
+</ng-template>

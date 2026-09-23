@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Firewall im 19-Zoll-Gehäuse">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="56" y="176" width="288" height="56" rx="8" fill="#fff"/>
+    <path d="M56 188h-16v32h16M344 188h16v32h-16" stroke="#94a3b8"/>
+    <rect x="84" y="194" width="20" height="14" rx="2" fill="#dbeafe"/>
+    <rect x="112" y="194" width="20" height="14" rx="2" fill="#dbeafe"/>
+    <rect x="140" y="194" width="20" height="14" rx="2" fill="#dbeafe"/>
+    <rect x="168" y="194" width="20" height="14" rx="2" fill="#dbeafe"/>
+    <rect x="196" y="194" width="20" height="14" rx="2" fill="#dbeafe"/>
+    <rect x="224" y="194" width="20" height="14" rx="2" fill="#dbeafe"/>
+    <rect x="252" y="194" width="20" height="14" rx="2" fill="#dbeafe"/>
+    <circle cx="316" cy="188" r="5" fill="#1b9e8c" stroke="none"/>
+    <circle cx="316" cy="216" r="5" fill="#2563eb" stroke="none"/>
+    <path d="M200 62l46 17v40c0 29-21 49-46 57-25-8-46-28-46-57V79Z" fill="#fff" stroke="#2563eb"/>
+    <path d="M180 120l16 17 28-30" stroke="#1b9e8c" stroke-width="7"/>
+  </g>
+</svg>

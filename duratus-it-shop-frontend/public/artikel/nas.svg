@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="NAS-System">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="132" y="76" width="136" height="164" rx="12" fill="#fff"/>
+    <path d="M156 100h88M156 134h88M156 168h88M156 202h88" stroke="#2563eb" stroke-width="8"/>
+    <circle cx="252" cy="100" r="5" fill="#1b9e8c" stroke="none"/>
+    <circle cx="252" cy="134" r="5" fill="#1b9e8c" stroke="none"/>
+    <circle cx="252" cy="168" r="5" fill="#94a3b8" stroke="none"/>
+    <circle cx="252" cy="202" r="5" fill="#94a3b8" stroke="none"/>
+  </g>
+</svg>

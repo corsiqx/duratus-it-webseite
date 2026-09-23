@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Lizenz für die Datensicherung">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="94" y="120" width="132" height="116" rx="10" fill="#fff"/>
+    <path d="M118 152h84M118 178h84M118 204h52" stroke="#2563eb" stroke-width="6"/>
+    <path d="M280 96l44 16v40c0 29-20 49-44 57-24-8-44-28-44-57v-40Z" fill="#fff" stroke="#0d1f3c"/>
+    <path d="M280 128a26 26 0 1 1-24 36" stroke="#1b9e8c" stroke-width="5"/>
+    <path d="M250 150l8 16 16-8" stroke="#1b9e8c" stroke-width="5"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Access Point">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="200" cy="200" rx="86" ry="30" fill="#fff"/>
+    <path d="M114 200v-12a86 30 0 0 1 172 0v12" fill="#fff"/>
+    <circle cx="200" cy="188" r="10" fill="#1b9e8c" stroke="none"/>
+    <path d="M148 118a74 74 0 0 1 104 0" stroke="#2563eb"/>
+    <path d="M168 142a44 44 0 0 1 64 0" stroke="#2563eb"/>
+  </g>
+</svg>

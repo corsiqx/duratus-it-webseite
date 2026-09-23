@@ -1,0 +1,657 @@
+import { DocPage } from '../models';
+
+/*
+ * Runbooks, how-tos, policies and checklists. Documents with customerId: null apply to every customer
+ * ("Allgemein") and are the standard Duratus IT works by.
+ */
+export const DEMO_DOCS: readonly DocPage[] = [
+  // ---------------------------------------------------------------- Allgemein
+  {
+    id: 'doc-g-001',
+    customerId: null,
+    title: 'Neuen Kunden aufnehmen',
+    category: 'checkliste',
+    summary: 'Was innerhalb der ersten vier Wochen dokumentiert sein muss, damit ein Kunde in den Regelbetrieb geht.',
+    updated: '05.08.2026',
+    author: 'Jan Hoffmann',
+    reviewDue: '05.08.2027',
+    tags: ['Onboarding', 'Pflicht', 'Kundenakte'],
+    sections: [
+      {
+        heading: 'Vor dem ersten Termin',
+        body: 'Der Vertrag muss unterschrieben sein und die Kundenakte hier angelegt werden. Ohne Akte wird nicht gearbeitet.',
+        steps: [
+          'Kundenakte anlegen: Stammdaten, Service-Level, Reaktionszeit, verantwortlicher Techniker und Vertretung.',
+          'Ansprechpartner erfassen und markieren, wer Entscheidungen treffen darf.',
+          'Standorte mit Zugangsweg und Schlüsselregelung eintragen.',
+          'Service-Fenster und Sperrzeiten abstimmen und in die Notizen schreiben.',
+        ],
+      },
+      {
+        heading: 'Bestandsaufnahme vor Ort',
+        body: 'Ein halber Tag mit zwei Personen. Alles fotografieren, was im Rack hängt, und direkt hier eintragen.',
+        steps: [
+          'Alle aktiven Geräte mit Seriennummer, Standort, Garantie und Firmware erfassen.',
+          'Netzplan zeichnen: WAN, Firewall, Switches, Server, WLAN, Sonderfälle wie Maschinen oder Kassen.',
+          'VLANs, IP-Bereiche und DHCP-Bereiche notieren.',
+          'Alle Zugangsdaten in den Tresor übernehmen und die alten Notizen des Kunden vernichten.',
+          'Backup prüfen: Ziel, Häufigkeit, Aufbewahrung, letzte erfolgreiche Wiederherstellung.',
+        ],
+        warning:
+          'Zugangsdaten niemals per E-Mail annehmen. Wenn der Kunde sie so schickt, hier eintragen, die Mail löschen und das Passwort wechseln.',
+      },
+      {
+        heading: 'Abschluss',
+        body: 'Der Kunde geht erst in den Regelbetrieb, wenn diese Punkte erledigt sind.',
+        steps: [
+          'Monitoring auf allen produktiven Geräten aktiv.',
+          'Notfallplan mit Eskalationskette und Wiederanlaufreihenfolge angelegt.',
+          'Lizenzen und Zertifikate mit Ablaufdatum erfasst.',
+          'Übergabegespräch mit dem Kunden, Protokoll als Tätigkeit dokumentiert.',
+        ],
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-g-002',
+    customerId: null,
+    title: 'Umgang mit Zugangsdaten',
+    category: 'richtlinie',
+    summary: 'Verbindliche Regeln für den Tresor: wer darf was sehen, wie wird rotiert, was ist verboten.',
+    updated: '12.09.2026',
+    author: 'Lea Brandt',
+    reviewDue: '12.03.2027',
+    tags: ['Sicherheit', 'Pflicht', 'Tresor'],
+    sections: [
+      {
+        heading: 'Grundregeln',
+        body: 'Diese Punkte gelten ohne Ausnahme, auch bei Zeitdruck.',
+        steps: [
+          'Zugangsdaten stehen nur im Tresor. Nicht in Tickets, nicht in E-Mails, nicht in Notizen auf dem Notebook.',
+          'Jedes Konto ist personenbezogen, wo es technisch geht. Sammelkonten nur, wenn der Hersteller nichts anderes zulässt.',
+          'Hochprivilegierte Konten bekommen die Stufe Vier-Augen und werden nur mit einer zweiten Person genutzt.',
+          'Nach jedem Personalwechsel bei uns oder beim Kunden werden alle geteilten Passwörter des Kunden gewechselt.',
+        ],
+        warning: 'Ein angesehenes Passwort gilt als offengelegt, sobald es jemand außerhalb des Teams erfahren hat. Dann sofort rotieren.',
+      },
+      {
+        heading: 'Rotation',
+        body: 'Die Fristen richten sich nach der Kritikalität des Systems.',
+        steps: [
+          'Firewalls, Domänenadministratoren und Cloud-Administratoren: alle 90 bis 180 Tage.',
+          'Dienstkonten: jährlich, nur mit geplantem Wartungsfenster, weil Abhängigkeiten dranhängen.',
+          'WLAN-Schlüssel: jährlich. Bei Scanner-Netzen vorher klären, wie viele Geräte neu eingerichtet werden müssen.',
+          'Sofort: nach Verdacht auf Offenlegung, nach Ausscheiden einer Person, nach einem Sicherheitsvorfall.',
+        ],
+      },
+      {
+        heading: 'Weitergabe an den Kunden',
+        body: 'Der Kunde hat Anspruch auf seine eigenen Zugangsdaten. Die Übergabe wird dokumentiert.',
+        steps: [
+          'Übergabe nur an einen Ansprechpartner, der als entscheidungsbefugt hinterlegt ist.',
+          'Übergabe über einen Einmal-Link oder persönlich, nie per Mail oder Messenger.',
+          'Die Übergabe als Tätigkeit dokumentieren, damit später nachvollziehbar ist, wer was bekommen hat.',
+        ],
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-g-003',
+    customerId: null,
+    title: 'Verdacht auf Ransomware',
+    category: 'runbook',
+    summary: 'Erste 60 Minuten bei einem Verschlüsselungsvorfall. Reihenfolge einhalten, nichts überspringen.',
+    updated: '01.09.2026',
+    author: 'Jan Hoffmann',
+    reviewDue: '01.03.2027',
+    tags: ['Notfall', 'Sicherheit', 'Pflicht'],
+    sections: [
+      {
+        heading: 'Sofort, in dieser Reihenfolge',
+        body: 'Ziel ist zuerst die Ausbreitung zu stoppen, danach die Beweissicherung, erst dann die Wiederherstellung.',
+        steps: [
+          'Betroffene Systeme vom Netz trennen, nicht ausschalten. Der Arbeitsspeicher ist Beweismittel.',
+          'Backup-Ziel sofort isolieren: NAS-Freigaben trennen, Cloud-Kopie sperren, Immutable-Zeitraum prüfen.',
+          'Geschäftsführung des Kunden und Duratus-Rufbereitschaft informieren, Uhrzeit notieren.',
+          'Konten mit Verdacht sperren, Passwörter der Administratoren wechseln (aus einem sauberen System heraus).',
+          'Vorfall als Tätigkeit anlegen und ab hier jeden Schritt mit Uhrzeit protokollieren.',
+        ],
+        warning:
+          'Keine Lösegeldverhandlung, keine eigenständige Kommunikation mit den Angreifern. Das entscheidet ausschließlich die Geschäftsführung des Kunden.',
+      },
+      {
+        heading: 'Meldepflichten prüfen',
+        body: 'Fristen laufen ab Kenntnisnahme, nicht ab Behebung.',
+        steps: [
+          'DSGVO: bei Betroffenheit personenbezogener Daten Meldung an die Aufsichtsbehörde innerhalb von 72 Stunden.',
+          'NIS2: bei betroffenen Kunden Erstmeldung innerhalb von 24 Stunden. Kundenakte prüfen, ob der Kunde betroffen ist.',
+          'Cyberversicherung: Police im Notfallplan des Kunden nachsehen, viele verlangen die Meldung binnen 24 Stunden.',
+        ],
+      },
+      {
+        heading: 'Wiederanlauf',
+        body: 'Erst wenn der Angriffsweg bekannt ist, sonst wird die Wiederherstellung erneut verschlüsselt.',
+        steps: [
+          'Wiederanlaufreihenfolge aus dem Notfallplan des Kunden verwenden.',
+          'Wiederherstellung in ein isoliertes Netz, Virenprüfung vor der Freigabe.',
+          'Passwörter aller Konten des Kunden wechseln, auch die im Tresor.',
+          'Nachbereitung: Ursache, Lücke, Maßnahme. Ergebnis als Dokument anlegen.',
+        ],
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-g-004',
+    customerId: null,
+    title: 'Mitarbeiter beim Kunden anlegen und entfernen',
+    category: 'checkliste',
+    summary: 'Onboarding und Offboarding von Beschäftigten beim Kunden, inklusive der Punkte, die am häufigsten vergessen werden.',
+    updated: '20.07.2026',
+    author: 'Sarah Kremer',
+    reviewDue: '20.07.2027',
+    tags: ['Onboarding', 'Offboarding', 'Standard'],
+    sections: [
+      {
+        heading: 'Neue Person',
+        body: 'Auftrag kommt immer schriftlich von einer entscheidungsbefugten Person des Kunden.',
+        steps: [
+          'Konto im Verzeichnis anlegen, Gruppen nach Abteilungsvorlage setzen.',
+          'Lizenz zuweisen und im Lizenzbestand des Kunden hochzählen.',
+          'Gerät ausgeben, in das Inventar aufnehmen, Verschlüsselung prüfen.',
+          'MFA einrichten und vom Nutzer bestätigen lassen.',
+          'Einweisung in Passwortregeln und Phishing-Meldeweg.',
+        ],
+      },
+      {
+        heading: 'Person verlässt das Unternehmen',
+        body: 'Am Austrittstag, nicht später. Die Reihenfolge verhindert, dass Daten verloren gehen.',
+        steps: [
+          'Konto deaktivieren, nicht löschen. Postfach in ein geteiltes Postfach umwandeln.',
+          'Aktive Sitzungen und Token widerrufen, MFA-Geräte entfernen.',
+          'VPN-Zugang entfernen und in der Netzdokumentation streichen.',
+          'Gerät einziehen, Inventar aktualisieren, Datenträger nach Vorgabe löschen.',
+          'Geteilte Passwörter wechseln, auf die die Person Zugriff hatte.',
+          'Lizenz freigeben und im Lizenzbestand abziehen.',
+        ],
+        warning: 'Der letzte Punkt wird am häufigsten vergessen und fällt erst bei der Rechnungsprüfung auf.',
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-g-005',
+    customerId: null,
+    title: 'Standard-Netzdesign Duratus IT',
+    category: 'architektur',
+    summary: 'Wie ein Kundennetz bei uns aufgebaut ist: Segmente, Nummernkreise, Namenskonventionen.',
+    updated: '18.06.2026',
+    author: 'Jan Hoffmann',
+    reviewDue: '18.06.2027',
+    tags: ['Netzwerk', 'Standard', 'Architektur'],
+    sections: [
+      {
+        heading: 'Segmente',
+        body: 'Jeder Kunde bekommt dieselbe Grundstruktur, damit jede Person sich sofort zurechtfindet.',
+        steps: [
+          'VLAN 10 Büro: Arbeitsplätze und Drucker.',
+          'VLAN 20 Server: Virtualisierung, Dateidienste, Backup. Keine Clients.',
+          'VLAN 30 WLAN: Firmengeräte. Gast-WLAN läuft getrennt über eine eigene SSID ohne Zugriff nach innen.',
+          'VLAN 40 Sondergeräte: Maschinen, Kassen, Medizintechnik. Grundsätzlich isoliert.',
+          'VLAN 99 Wartung: Zugriff von Duratus IT über VPN, nur mit MFA.',
+        ],
+      },
+      {
+        heading: 'Adressen und Namen',
+        body: 'Nummernkreise werden zentral vergeben, damit Site-to-Site-Kopplungen später nicht kollidieren.',
+        code: '10.<Kundennummer>.<VLAN>.0/24\nBeispiel Muster GmbH (20): 10.20.10.0/24 Büro, 10.20.20.0/24 Server\n\nGerätenamen: <Typ>-<Kürzel>-<Nummer>\nBeispiel: FW-MU-01, SW-MU-CORE, SRV-MU-ESX01',
+      },
+      {
+        heading: 'Was immer dokumentiert wird',
+        body: 'Ohne diese Angaben gilt ein Netz als nicht dokumentiert.',
+        steps: [
+          'Netzplan mit allen aktiven Komponenten.',
+          'VLAN-Tabelle mit Zweck und erlaubten Zielen.',
+          'Firewall-Regeln in Klartext, nicht nur als Screenshot.',
+          'Alle VPN-Verbindungen mit Gegenstelle und freigegebenen Netzen.',
+        ],
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-g-006',
+    customerId: null,
+    title: 'Wiederherstellung aus dem Backup testen',
+    category: 'howto',
+    summary: 'Quartalsweiser Testlauf. Ein Backup gilt erst als vorhanden, wenn daraus wiederhergestellt wurde.',
+    updated: '30.06.2026',
+    author: 'Nils Overberg',
+    reviewDue: '30.12.2026',
+    tags: ['Backup', 'Pflicht', 'Quartal'],
+    sections: [
+      {
+        heading: 'Vorbereitung',
+        body: 'Der Test läuft in einem isolierten Netz, damit die wiederhergestellte Maschine nicht mit dem Original kollidiert.',
+        steps: [
+          'Testnetz ohne Verbindung zum Produktivnetz bereitstellen.',
+          'Zu testendes System auswählen, quartalsweise wechseln.',
+          'Zeitfenster mit dem Kunden abstimmen, falls Last auf dem Backup-Ziel entsteht.',
+        ],
+      },
+      {
+        heading: 'Durchführung',
+        body: 'Gemessen wird die Zeit bis zum nutzbaren System, nicht bis zum Ende des Kopiervorgangs.',
+        steps: [
+          'Wiederherstellung starten und die Startzeit notieren.',
+          'System hochfahren, Anmeldung prüfen, eine echte Datei öffnen.',
+          'Bei Datenbanken: Konsistenzprüfung laufen lassen.',
+          'Dauer mit dem vereinbarten RTO aus dem Notfallplan vergleichen.',
+          'Testmaschine wieder löschen.',
+        ],
+        warning: 'Wenn die gemessene Zeit über dem vereinbarten RTO liegt, geht eine Information an den Kunden und der Notfallplan wird angepasst.',
+      },
+      {
+        heading: 'Dokumentation',
+        body: 'Ergebnis als Tätigkeit anlegen, mit Datum, Dauer, getestetem System und Ergebnis. Im Notfallplan das Feld "zuletzt getestet" nachziehen.',
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-g-007',
+    customerId: null,
+    title: 'Firewall austauschen',
+    category: 'runbook',
+    summary: 'Vorbereiteter Ablauf für den geplanten Tausch einer Firewall, inklusive Rückfallplan.',
+    updated: '11.05.2026',
+    author: 'Tobias Menke',
+    reviewDue: '11.05.2027',
+    tags: ['Netzwerk', 'Change', 'Runbook'],
+    sections: [
+      {
+        heading: 'Vorbereitung, mindestens eine Woche vorher',
+        body: 'Der größte Teil der Arbeit passiert vor dem Termin. Vor Ort soll nur noch getauscht werden.',
+        steps: [
+          'Konfiguration der alten Firewall sichern und ausdrucken oder exportieren.',
+          'Neues Gerät im Büro vorkonfigurieren: Schnittstellen, VLANs, Regeln, VPN, Zertifikate.',
+          'Alle VPN-Gegenstellen informieren, bei Site-to-Site beide Seiten planen.',
+          'Wartungsfenster mit dem Kunden schriftlich bestätigen.',
+          'Rückfallplan festlegen: altes Gerät bleibt vor Ort und betriebsbereit.',
+        ],
+      },
+      {
+        heading: 'Am Wartungstag',
+        body: '',
+        steps: [
+          'Vorher-Messung: Erreichbarkeit der wichtigsten Dienste dokumentieren.',
+          'Altes Gerät abklemmen, neues einsetzen, WAN zuerst prüfen.',
+          'VLAN für VLAN testen, Reihenfolge: Server, Büro, WLAN, Sondergeräte.',
+          'VPN-Tunnel aufbauen und von der Gegenseite prüfen lassen.',
+          'Nachher-Messung, Ergebnisse mit der Vorher-Messung vergleichen.',
+        ],
+        warning: 'Abbruchkriterium: Wenn nach 90 Minuten die Kernsysteme nicht laufen, zurück auf das alte Gerät und neuen Termin machen.',
+      },
+      {
+        heading: 'Nachbereitung',
+        body: 'Am selben Tag erledigen, sonst bleibt die Dokumentation liegen.',
+        steps: [
+          'Netzplan und Inventar aktualisieren, altes Gerät auf "ausgemustert" setzen.',
+          'Zugangsdaten im Tresor auf das neue Gerät umschreiben.',
+          'Tätigkeit mit Dauer, Schritten und Rückfallplan dokumentieren.',
+          'Altgerät nach Vorgabe löschen und entsorgen oder als Ersatz einlagern.',
+        ],
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-g-008',
+    customerId: null,
+    title: 'Wie in dieser Wissensdatenbank dokumentiert wird',
+    category: 'richtlinie',
+    summary: 'Mindeststandard für jeden Eintrag: verständlich, aktuell, ohne Fachjargon, nachvollziehbar für die Vertretung.',
+    updated: '16.09.2026',
+    author: 'Jan Hoffmann',
+    reviewDue: '16.09.2027',
+    tags: ['Standard', 'Pflicht', 'Meta'],
+    sections: [
+      {
+        heading: 'Der Vertretungstest',
+        body: 'Eine Kollegin, die den Kunden nicht kennt, muss die Arbeit nach dem Dokument allein erledigen können. Wenn das nicht geht, fehlt etwas.',
+      },
+      {
+        heading: 'Regeln',
+        body: '',
+        steps: [
+          'Jede Tätigkeit an der Infrastruktur wird am selben Tag dokumentiert.',
+          'Einfache Begriffe verwenden. Abkürzungen beim ersten Auftreten erklären.',
+          'Warum steht vor Wie: der Grund für eine Einstellung ist wichtiger als die Einstellung selbst.',
+          'Screenshots ersetzen keinen Text. Namen, Adressen und Werte gehören ausgeschrieben.',
+          'Jedes Dokument bekommt ein Prüfdatum. Abgelaufene Dokumente erscheinen auf der Startseite.',
+        ],
+      },
+      {
+        heading: 'Was hier nicht hingehört',
+        body: '',
+        steps: [
+          'Personenbezogene Daten von Beschäftigten des Kunden über den dienstlichen Kontakt hinaus.',
+          'Patientendaten, Personalakten, Inhalte von Kundendateien.',
+          'Passwörter im Fließtext. Die gehören ausschließlich in den Tresor.',
+        ],
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+
+  // ---------------------------------------------------------------- Muster GmbH
+  {
+    id: 'doc-mu-001',
+    customerId: 'muster-gmbh',
+    title: 'Wartungsfenster in der Produktion',
+    category: 'runbook',
+    summary: 'Wann bei der Muster GmbH gearbeitet werden darf und wie die Freigabe für die Maschinensteuerungen läuft.',
+    updated: '02.09.2026',
+    author: 'Jan Hoffmann',
+    reviewDue: '02.03.2027',
+    tags: ['Produktion', 'Wartung', 'Pflicht'],
+    sections: [
+      {
+        heading: 'Zeiten',
+        body: 'Die Fertigung läuft im Zweischichtbetrieb von 06:00 bis 22:00 Uhr. Alles, was Netz oder Server betrifft, passiert danach.',
+        steps: [
+          'Neustarts von Switches und Firewall: werktags ab 22:15 Uhr oder samstags.',
+          'Serverwartung: samstags ab 08:00 Uhr, Fenster bis 14:00 Uhr.',
+          'Arbeiten im VLAN 40 nur nach ausdrücklicher Freigabe der Produktionsleitung.',
+        ],
+        warning: 'Ein Neustart des SW-MU-PROD trennt die Handscanner. Läuft eine Fertigung, stoppt damit die Rückmeldung an das ERP.',
+      },
+      {
+        heading: 'Freigabe einholen',
+        body: 'Die Freigabe kommt von Dirk Bönning (Produktionsleitung), Vertretung ist Petra Lammers.',
+        steps: [
+          'Spätestens zwei Werktage vorher per E-Mail anfragen, mit Datum, Dauer und betroffenen Systemen.',
+          'Freigabe abwarten und als Anhang zur Tätigkeit dokumentieren.',
+          'Am Wartungstag vor Beginn kurz in der Halle Bescheid geben.',
+        ],
+      },
+    ],
+    relatedAssets: ['as-mu-swprod', 'as-mu-core'],
+    relatedSecrets: [],
+  },
+  {
+    id: 'doc-mu-002',
+    customerId: 'muster-gmbh',
+    title: 'ERP-Update einspielen',
+    category: 'howto',
+    summary: 'Ablauf für die halbjährlichen Updates des ERP-Herstellers, inklusive Snapshot und Rückweg.',
+    updated: '15.03.2026',
+    author: 'Lea Brandt',
+    reviewDue: '15.03.2027',
+    tags: ['ERP', 'Datenbank', 'Wartung'],
+    sections: [
+      {
+        heading: 'Vorbereitung',
+        body: 'Der Hersteller spielt das Update selbst ein, wir stellen die Umgebung bereit und begleiten den Termin.',
+        steps: [
+          'Termin mit Hersteller und Kunde abstimmen, immer samstags.',
+          'Vollbackup prüfen: letzte erfolgreiche Sicherung darf nicht älter als 24 Stunden sein.',
+          'Snapshot der ERP-Maschine ziehen, Beschreibung mit Datum und Version.',
+          'Wartungskonto der Datenbank bereitlegen, Zugang steht im Tresor.',
+        ],
+      },
+      {
+        heading: 'Während des Updates',
+        body: '',
+        steps: [
+          'Fernwartungszugang des Herstellers freischalten und die Sitzung mitverfolgen.',
+          'Nach dem Update: Anmeldung, Auftragserfassung und eine Rückmeldung von einer Maschine testen.',
+          'Fernwartungszugang wieder sperren.',
+        ],
+        warning: 'Der Snapshot wird erst nach der Freigabe durch den Kunden gelöscht, spätestens nach 7 Tagen. Länger stehende Snapshots bremsen die Maschine.',
+      },
+    ],
+    relatedAssets: ['as-mu-esx01'],
+    relatedSecrets: ['sc-mu-007'],
+  },
+  {
+    id: 'doc-mu-003',
+    customerId: 'muster-gmbh',
+    title: 'Handscanner neu einrichten',
+    category: 'howto',
+    summary: 'Was zu tun ist, wenn ein Scanner in der Halle das WLAN verliert oder ersetzt wird.',
+    updated: '20.04.2026',
+    author: 'Nils Overberg',
+    reviewDue: '20.04.2027',
+    tags: ['WLAN', 'Produktion', 'Häufig'],
+    sections: [
+      {
+        heading: 'Erst prüfen, dann tauschen',
+        body: 'In neun von zehn Fällen liegt es nicht am Gerät.',
+        steps: [
+          'Im Monitoring prüfen, ob AP-MU-HALLE-01 erreichbar ist.',
+          'Prüfen, ob andere Scanner betroffen sind. Wenn ja, liegt es am Accesspoint oder am Switch.',
+          'Scanner neu starten und erneut verbinden lassen.',
+        ],
+      },
+      {
+        heading: 'Neu einrichten',
+        body: 'Der Netzwerkschlüssel steht im Tresor unter "WLAN Produktion".',
+        steps: [
+          'SSID MUSTER-PROD auswählen, Schlüssel aus dem Tresor eintragen.',
+          'Feste Zuordnung im DHCP prüfen, Scanner brauchen eine Adresse aus 10.20.30.0/24.',
+          'Testscan an einer Maschine durchführen und Rückmeldung im ERP prüfen.',
+          'Gerät im Inventar nachtragen, wenn es ein Ersatzgerät ist.',
+        ],
+      },
+    ],
+    relatedAssets: ['as-mu-ap1'],
+    relatedSecrets: ['sc-mu-006'],
+  },
+
+  // ---------------------------------------------------------------- Nordlicht Logistik
+  {
+    id: 'doc-nl-001',
+    customerId: 'nordlicht-logistik',
+    title: 'Lagerverwaltung nicht erreichbar',
+    category: 'runbook',
+    summary: 'Höchste Priorität: steht das WMS, steht die Kommissionierung. Ablauf für die ersten 15 Minuten.',
+    updated: '11.09.2026',
+    author: 'Lea Brandt',
+    reviewDue: '11.03.2027',
+    tags: ['Störung', 'WMS', 'Kritisch', '24/7'],
+    sections: [
+      {
+        heading: 'Zuerst klären: wer ist betroffen',
+        body: 'Die Antwort entscheidet, wo gesucht wird.',
+        steps: [
+          'Schichtleitung Lager anrufen (02571 774400) und fragen, ob nur die Scanner oder auch die PCs betroffen sind.',
+          'Nur Scanner im Lager: Problem liegt beim WLAN oder am Tunnel.',
+          'Auch Verwaltung Münster: Problem liegt am Server oder am WMS selbst.',
+        ],
+      },
+      {
+        heading: 'Tunnel und WLAN',
+        body: '',
+        steps: [
+          'Auf FW-NL-GR-01 prüfen, ob der Tunnel steht und ob der LTE-Failover aktiv ist.',
+          'Bei aktivem Failover: Anbieterstörung prüfen, Kunde informieren, Bandbreite reicht nur für den Notbetrieb.',
+          'Accesspoints im Monitoring prüfen. Fällt eine Gasse aus, betrifft es genau den Bereich.',
+        ],
+      },
+      {
+        heading: 'Server und Anwendung',
+        body: 'Der interne IT-Koordinator Ahmet Yildiz hat eigene Rechte im WMS und sollte immer dazugeholt werden.',
+        steps: [
+          'Cluster prüfen: läuft die Maschine, ist sie auf dem erwarteten Knoten?',
+          'Dienste des WMS prüfen, nur nach Rücksprache neu starten.',
+          'Bei Datenbankproblemen Hersteller-Support einschalten, Vertragsnummer steht bei den Lizenzen.',
+        ],
+        warning: 'Kein eigenmächtiger Neustart der WMS-Maschine während einer laufenden Schicht. Erst mit der Schichtleitung abstimmen.',
+      },
+    ],
+    relatedAssets: ['as-nl-esx01', 'as-nl-lager-fw', 'as-nl-lager-ap'],
+    relatedSecrets: ['sc-nl-003', 'sc-nl-002'],
+  },
+  {
+    id: 'doc-nl-002',
+    customerId: 'nordlicht-logistik',
+    title: 'NIS2: Maßnahmen und Nachweise',
+    category: 'richtlinie',
+    summary: 'Was der Kunde nachweisen muss und welche Teile davon Duratus IT liefert.',
+    updated: '05.09.2026',
+    author: 'Jan Hoffmann',
+    reviewDue: '05.12.2026',
+    tags: ['NIS2', 'Compliance', 'Nachweis'],
+    sections: [
+      {
+        heading: 'Warum betroffen',
+        body: 'Der Kunde fällt als Logistikdienstleister mit mehr als 50 Beschäftigten in den erweiterten Anwendungsbereich. Die Einstufung wurde im Juni 2026 gemeinsam mit der Geschäftsführung festgestellt.',
+      },
+      {
+        heading: 'Maßnahmen, die wir liefern',
+        body: 'Der Nachweis wird jährlich aktualisiert und dem Kunden als Bericht übergeben.',
+        steps: [
+          'Aktuelle Netz- und Systemdokumentation (diese Wissensdatenbank).',
+          'Nachgewiesene Backups mit quartalsweisem Wiederherstellungstest.',
+          'Protokollierung aller privilegierten Zugriffe, Weitergabe an das SIEM des Kunden.',
+          'Patchstand-Berichte monatlich.',
+          'Meldewege für Sicherheitsvorfälle, abgestimmt mit der Geschäftsführung.',
+        ],
+      },
+      {
+        heading: 'Was der Kunde selbst verantwortet',
+        body: '',
+        steps: [
+          'Benennung der verantwortlichen Leitungsperson und deren Schulung.',
+          'Risikoanalyse und Lieferkettenbetrachtung.',
+          'Meldung von Vorfällen an das BSI innerhalb der Fristen.',
+          'Schulung der Beschäftigten, Nachweis über die Teilnahme.',
+        ],
+        warning: 'Offen: Der Meldeweg an das BSI ist noch nicht schriftlich festgelegt. Termin mit der Geschäftsführung steht für Oktober 2026 an.',
+      },
+    ],
+    relatedAssets: [],
+    relatedSecrets: [],
+  },
+
+  // ---------------------------------------------------------------- Aatal MVZ
+  {
+    id: 'doc-aa-001',
+    customerId: 'aatal-mvz',
+    title: 'Zugriff auf Systeme mit Patientendaten',
+    category: 'richtlinie',
+    summary: 'Strenge Regeln für jeden Eingriff am Praxisverwaltungssystem. Gilt für alle Beschäftigten von Duratus IT.',
+    updated: '14.05.2026',
+    author: 'Sarah Kremer',
+    reviewDue: '14.11.2026',
+    tags: ['DSGVO', 'Patientendaten', 'Pflicht'],
+    sections: [
+      {
+        heading: 'Grundsatz',
+        body: 'Zugriff nur mit konkretem Anlass, nur im notwendigen Umfang, immer angekündigt und immer protokolliert. Es gilt die Auftragsverarbeitungsvereinbarung vom 01.10.2024.',
+        warning: 'Patientendaten werden niemals exportiert, kopiert, per Mail versendet oder in Tickets zitiert, auch nicht in Ausschnitten.',
+      },
+      {
+        heading: 'Ablauf bei einem Eingriff',
+        body: '',
+        steps: [
+          'Anlass klären und mit dem Praxismanagement abstimmen (Frank Osterkamp).',
+          'Zugriff über den Wartungszugang, Stufe Vier-Augen: eine zweite Person aus dem Team ist dabei.',
+          'Bildschirmfreigabe mit dem Kunden, solange am System gearbeitet wird.',
+          'Nach dem Eingriff Sitzung beenden, Tätigkeit mit Anlass, Dauer und beteiligten Personen dokumentieren.',
+        ],
+      },
+      {
+        heading: 'Im Störungsfall außerhalb der Sprechzeiten',
+        body: 'Auch dann gilt die Ankündigung. Notfalls telefonisch bei der ärztlichen Leitung, Uhrzeit notieren.',
+      },
+    ],
+    relatedAssets: ['as-aa-srv01'],
+    relatedSecrets: ['sc-aa-002'],
+  },
+  {
+    id: 'doc-aa-002',
+    customerId: 'aatal-mvz',
+    title: 'Störung der TI-Anbindung',
+    category: 'runbook',
+    summary: 'Abgrenzung: Was wir beheben und wo die Zuständigkeit bei der KV liegt.',
+    updated: '28.08.2026',
+    author: 'Sarah Kremer',
+    reviewDue: '28.02.2027',
+    tags: ['TI', 'Störung', 'Abgrenzung'],
+    sections: [
+      {
+        heading: 'Wer ist zuständig',
+        body: 'Der TI-Konnektor und die Kartenterminals gehören dem Rechenzentrum der KV. Wir verantworten nur das Netz bis zum Konnektor.',
+        steps: [
+          'Netz prüfen: Ist das VLAN 70 erreichbar, hat der Konnektor Verbindung zur Firewall?',
+          'Wenn ja, ist die Störung bei der KV. Hotline der KV anrufen, Vorgangsnummer notieren.',
+          'Wenn nein, bei uns weitersuchen: Switchport, VLAN-Zuordnung, Firewall-Regel.',
+        ],
+      },
+      {
+        heading: 'Notbetrieb',
+        body: 'Die Praxis kann ohne TI weiterarbeiten, das Ersatzverfahren kennt das Praxismanagement.',
+        steps: [
+          'Praxismanagement informieren, dass auf Ersatzverfahren umgestellt werden muss.',
+          'Störung als Tätigkeit dokumentieren, mit Vorgangsnummer der KV.',
+          'Nach Behebung Funktion gemeinsam mit der Anmeldung testen.',
+        ],
+      },
+    ],
+    relatedAssets: ['as-aa-fw01'],
+    relatedSecrets: [],
+  },
+
+  // ---------------------------------------------------------------- Vennemann Holzbau
+  {
+    id: 'doc-ve-001',
+    customerId: 'vennemann-holzbau',
+    title: 'Bestandsaufnahme und offene Risiken',
+    category: 'architektur',
+    summary: 'Ergebnis der Übernahme im Juni 2025 und die Punkte, die dem Kunden bekannt sind, aber noch offen stehen.',
+    updated: '14.06.2025',
+    author: 'Tobias Menke',
+    reviewDue: '14.12.2026',
+    tags: ['Übernahme', 'Risiko', 'Upsell'],
+    sections: [
+      {
+        heading: 'Ausgangslage',
+        body: 'Vorher hat ein regionaler Dienstleister ohne Dokumentation betreut. Die Umgebung ist klein und funktioniert, ist aber ohne Ausfallschutz aufgebaut.',
+      },
+      {
+        heading: 'Offene Risiken',
+        body: 'Alle Punkte wurden der Geschäftsführung am 20.06.2025 schriftlich mitgeteilt.',
+        steps: [
+          'Kein zweites Backup: Die Daten liegen nur auf dem NAS im Büro. Ein Brand oder Diebstahl bedeutet Totalverlust.',
+          'Keine Netztrennung: Büro, WLAN und Gastgeräte liegen in einem Netz.',
+          'Schwaches Firewall-Passwort aus der Übernahme, ohne zweiten Faktor.',
+          'Firmware der Firewall noch auf Version 20.0.',
+        ],
+        warning: 'Angebot für Managed Backup liegt seit August 2026 beim Kunden. Bis zur Entscheidung bleibt das Risiko bestehen und ist so dokumentiert.',
+      },
+      {
+        heading: 'Nächste Schritte',
+        body: '',
+        steps: [
+          'Beim nächsten Vor-Ort-Termin: Firewall-Passwort wechseln und MFA einrichten.',
+          'Firmware-Update auf 21.0 im selben Termin.',
+          'Nachfassen zum Backup-Angebot im Oktober 2026.',
+        ],
+      },
+    ],
+    relatedAssets: ['as-ve-fw01', 'as-ve-nas'],
+    relatedSecrets: ['sc-ve-001'],
+  },
+];

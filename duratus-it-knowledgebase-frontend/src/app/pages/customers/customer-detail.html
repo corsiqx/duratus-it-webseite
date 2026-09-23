@@ -1,0 +1,544 @@
+@if (customer(); as kunde) {
+  <a routerLink="/kunden" class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-muted transition-colors hover:text-ink">
+    <ng-icon name="phosphorArrowLeft" size="16" />
+    Alle Kundenakten
+  </a>
+
+  <!-- Kopf -->
+  <header class="mt-2 flex flex-wrap items-start gap-4 rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6">
+    <span class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-night text-lg font-bold text-white">
+      {{ kunde.shortName.slice(0, 2).toUpperCase() }}
+    </span>
+    <div class="min-w-0 flex-1">
+      <h2 class="text-xl font-bold tracking-tight text-ink sm:text-2xl">{{ kunde.name }}</h2>
+      <p class="mt-1 text-sm text-muted">{{ kunde.branch }} · Kunde seit {{ kunde.since }}</p>
+      <div class="mt-3 flex flex-wrap items-center gap-2">
+        <app-status-badge [status]="level[kunde.serviceLevel]" />
+        <span class="rounded-full bg-canvas-alt px-2.5 py-1 text-xs font-medium text-muted ring-1 ring-line ring-inset">
+          Reaktionszeit {{ kunde.reactionTime }}
+        </span>
+        <span
+          class="rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+          [class]="kunde.nis2 === 'betroffen' ? 'bg-violet-50 text-violet-800 ring-violet-600/20' : 'bg-canvas-alt text-muted ring-line'"
+        >
+          NIS2: {{ kunde.nis2 }}
+        </span>
+        @for (tag of kunde.tags; track tag) {
+          <span class="rounded-full bg-canvas-alt px-2.5 py-1 text-xs font-medium text-muted ring-1 ring-line ring-inset">{{ tag }}</span>
+        }
+      </div>
+    </div>
+    <button
+      type="button"
+      class="flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      [class]="pinned() ? 'bg-primary-soft text-primary ring-primary/20' : 'text-slate-700 ring-line hover:bg-canvas-alt'"
+      (click)="store.togglePin(customerId())"
+    >
+      <ng-icon [name]="pinned() ? 'phosphorPushPin' : 'phosphorPushPinSimple'" size="17" />
+      {{ pinned() ? 'Angeheftet' : 'Anheften' }}
+    </button>
+  </header>
+
+  <!-- Reiter -->
+  <nav class="-mx-4 mt-5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden" aria-label="Bereiche der Kundenakte">
+    <ul class="inline-flex gap-1 rounded-full bg-slate-200/60 p-1">
+      @for (item of tabs; track item.id) {
+        <li>
+          <a
+            [routerLink]="tabLink(item.id)"
+            class="flex min-h-10 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-primary"
+            [class]="activeTab() === item.id ? 'bg-canvas text-ink shadow-sm' : 'text-slate-600 hover:text-ink'"
+            [attr.aria-current]="activeTab() === item.id ? 'page' : null"
+          >
+            {{ item.label }}
+            @if (counts()[item.id] > 0) {
+              <span class="rounded-full bg-slate-900/[0.06] px-1.5 text-xs leading-5 text-muted tabular-nums">{{ counts()[item.id] }}</span>
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <div class="mt-5">
+    @switch (activeTab()) {
+      <!-- ---------------------------------------------------------------- Übersicht -->
+      @case ('uebersicht') {
+        <div class="grid gap-5 lg:grid-cols-3">
+          <div class="flex min-w-0 flex-col gap-5 lg:col-span-2">
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="stamm-heading">
+              <h3 id="stamm-heading" class="font-bold text-ink">Stammdaten</h3>
+              <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <dt class="text-xs text-muted">Verantwortlich</dt>
+                  <dd class="mt-0.5 font-medium text-ink">{{ kunde.responsible }}</dd>
+                  <dd class="text-sm text-muted">Vertretung: {{ kunde.substitute }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-muted">Servicezeit</dt>
+                  <dd class="mt-0.5 font-medium text-ink">{{ kunde.serviceWindow }}</dd>
+                  <dd class="text-sm text-muted">Reaktionszeit {{ kunde.reactionTime }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-muted">Größe</dt>
+                  <dd class="mt-0.5 font-medium text-ink tabular-nums">{{ kunde.employees }} Beschäftigte, {{ kunde.workplaces }} Arbeitsplätze</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-muted">Monatliches Volumen</dt>
+                  <dd class="mt-0.5 font-medium text-ink tabular-nums">{{ euro(kunde.monthlyVolume) }} netto</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section class="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-600/20" aria-labelledby="notiz-heading">
+              <h3 id="notiz-heading" class="flex items-center gap-2 font-bold text-amber-900">
+                <ng-icon name="phosphorWarningCircle" size="18" />
+                Das muss man wissen
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-amber-900/90">{{ kunde.notes }}</p>
+            </section>
+
+            <section aria-labelledby="standorte-heading">
+              <h3 id="standorte-heading" class="font-bold text-ink">Standorte</h3>
+              <ul class="mt-3 grid gap-3 sm:grid-cols-2">
+                @for (site of sites(); track site.id) {
+                  <li class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+                    <div class="flex items-start justify-between gap-2">
+                      <h4 class="font-semibold text-ink">{{ site.name }}</h4>
+                      @if (site.main) {
+                        <span class="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">Hauptstandort</span>
+                      }
+                    </div>
+                    <p class="mt-1 text-sm text-muted">{{ site.street }}, {{ site.city }}</p>
+                    <dl class="mt-3 flex flex-col gap-1.5 text-sm">
+                      <div class="flex gap-2">
+                        <dt class="shrink-0 text-muted">Anschluss:</dt>
+                        <dd class="text-ink">{{ site.wanProvider }}, {{ site.wanBandwidth }}</dd>
+                      </div>
+                      @if (site.backupWan) {
+                        <div class="flex gap-2">
+                          <dt class="shrink-0 text-muted">Ersatzweg:</dt>
+                          <dd class="text-ink">{{ site.backupWan }}</dd>
+                        </div>
+                      }
+                      <div class="flex gap-2">
+                        <dt class="shrink-0 text-muted">Zutritt:</dt>
+                        <dd class="text-ink">{{ site.accessNote }}</dd>
+                      </div>
+                    </dl>
+                  </li>
+                }
+              </ul>
+            </section>
+          </div>
+
+          <div class="flex min-w-0 flex-col gap-5">
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="offen-heading">
+              <h3 id="offen-heading" class="font-bold text-ink">Fristen in den nächsten 60 Tagen</h3>
+              @if (openItems().length === 0) {
+                <p class="mt-2 text-sm text-muted">Nichts offen.</p>
+              } @else {
+                <ul class="mt-3 flex flex-col gap-3">
+                  @for (item of openItems(); track item.id) {
+                    <li class="border-l-2 pl-3" [class]="item.daysLeft < 0 ? 'border-red-500' : 'border-amber-400'">
+                      <p class="text-sm font-medium text-ink">{{ item.title }}</p>
+                      <p class="text-xs text-muted">{{ item.date }} · {{ item.detail }}</p>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="lizenz-heading">
+              <h3 id="lizenz-heading" class="font-bold text-ink">Lizenzen und Verträge</h3>
+              <ul class="mt-3 flex flex-col gap-3">
+                @for (license of licenses(); track license.id) {
+                  <li class="flex items-start gap-2.5">
+                    <ng-icon [name]="licenseKind[license.kind].icon" size="17" class="mt-0.5 shrink-0 text-slate-400" />
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-ink">{{ license.name }}</p>
+                      <p class="text-xs text-muted tabular-nums">
+                        {{ license.quantity }} {{ license.unit }} · bis {{ license.renewsOn }} · {{ euro(license.costPerYear) }}/Jahr
+                      </p>
+                    </div>
+                  </li>
+                }
+              </ul>
+              <a routerLink="/lizenzen" class="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                Alle Fristen
+                <ng-icon name="phosphorArrowRight" size="16" />
+              </a>
+            </section>
+          </div>
+        </div>
+      }
+
+      <!-- ---------------------------------------------------------------- Ansprechpartner -->
+      @case ('kontakte') {
+        <ul class="grid gap-4 md:grid-cols-2">
+          @for (contact of contacts(); track contact.id) {
+            <li class="rounded-2xl bg-canvas p-5 ring-1 ring-line">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-ink">{{ contact.name }}</h3>
+                  <p class="mt-0.5 text-sm text-muted">{{ contact.role }}</p>
+                </div>
+                <div class="flex shrink-0 flex-col items-end gap-1">
+                  @if (contact.decisionMaker) {
+                    <span class="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">Entscheidet</span>
+                  }
+                  @if (contact.emergency) {
+                    <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">Notfallkette</span>
+                  }
+                </div>
+              </div>
+              <dl class="mt-4 flex flex-col gap-2 text-sm">
+                <div class="flex items-center gap-2">
+                  <dt class="sr-only">E-Mail</dt>
+                  <ng-icon name="phosphorEnvelopeSimple" size="16" class="shrink-0 text-slate-400" />
+                  <dd class="min-w-0 flex-1 truncate">
+                    <a [href]="'mailto:' + contact.email" class="text-primary hover:underline">{{ contact.email }}</a>
+                  </dd>
+                  <app-copy-button [value]="contact.email" [withLabel]="false" label="E-Mail-Adresse kopieren" />
+                </div>
+                <div class="flex items-center gap-2">
+                  <dt class="sr-only">Telefon</dt>
+                  <ng-icon name="phosphorPhone" size="16" class="shrink-0 text-slate-400" />
+                  <dd class="min-w-0 flex-1 truncate">
+                    <a [href]="tel(contact.phone)" class="text-primary hover:underline">{{ contact.phone }}</a>
+                  </dd>
+                  <app-copy-button [value]="contact.phone" [withLabel]="false" label="Telefonnummer kopieren" />
+                </div>
+                <div class="flex items-start gap-2">
+                  <dt class="sr-only">Standort</dt>
+                  <ng-icon name="phosphorMapPin" size="16" class="mt-0.5 shrink-0 text-slate-400" />
+                  <dd class="text-muted">{{ siteName(contact.siteId) }}</dd>
+                </div>
+              </dl>
+              @if (contact.note) {
+                <p class="mt-3 border-t border-line pt-3 text-sm text-muted">{{ contact.note }}</p>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- ---------------------------------------------------------------- Zugänge -->
+      @case ('zugaenge') {
+        <div class="flex items-start gap-3 rounded-2xl bg-night p-4 text-sm text-slate-300">
+          <ng-icon name="phosphorLockKey" size="20" class="mt-0.5 shrink-0 text-teal-300" />
+          <p>
+            Passwörter bleiben verdeckt, bis sie bewusst geöffnet werden, und verdecken sich nach 30 Sekunden wieder.
+            Jeder Zugriff steht im <a routerLink="/protokoll" class="font-semibold text-teal-300 underline">Zugriffsprotokoll</a>.
+          </p>
+        </div>
+        <ul class="mt-4 grid gap-4 xl:grid-cols-2">
+          @for (secret of secrets(); track secret.id) {
+            <li class="min-w-0"><app-secret-card [secret]="secret" [showCustomer]="false" (rotate)="openRotate($event)" /></li>
+          }
+        </ul>
+      }
+
+      <!-- ---------------------------------------------------------------- Inventar -->
+      @case ('inventar') {
+        <!-- Tabelle ab md, darunter Karten. -->
+        <div class="hidden overflow-hidden rounded-2xl bg-canvas ring-1 ring-line md:block">
+          <table class="w-full text-left text-sm">
+            <thead class="border-b border-line bg-canvas-alt text-xs text-muted uppercase">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-semibold">Gerät</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Typ</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Adresse</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Standort</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Garantie</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              @for (asset of assets(); track asset.id) {
+                <tr class="align-top">
+                  <th scope="row" class="px-4 py-3 font-semibold text-ink">
+                    {{ asset.name }}
+                    <span class="mt-0.5 block text-xs font-normal text-muted">{{ asset.vendor }} {{ asset.model }}</span>
+                    <span class="mt-0.5 block font-mono text-xs font-normal text-slate-400">SN {{ asset.serial }}</span>
+                  </th>
+                  <td class="px-4 py-3 text-muted">{{ assetType[asset.type].label }}</td>
+                  <td class="px-4 py-3 font-mono text-xs text-muted">
+                    {{ asset.ip ?? 'ohne feste Adresse' }}
+                    @if (asset.os) {
+                      <span class="mt-0.5 block font-sans">{{ asset.os }}</span>
+                    }
+                  </td>
+                  <td class="px-4 py-3 text-muted">{{ asset.location }}</td>
+                  <td class="px-4 py-3">
+                    <span class="block tabular-nums">{{ asset.warrantyUntil }}</span>
+                    <app-status-badge [status]="warrantyStatus(asset.warrantyUntil)" />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <ul class="flex flex-col gap-3 md:hidden">
+          @for (asset of assets(); track asset.id) {
+            <li class="rounded-2xl bg-canvas p-4 ring-1 ring-line">
+              <div class="flex items-start gap-3">
+                <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-canvas-alt text-slate-500">
+                  <ng-icon [name]="assetType[asset.type].icon" size="18" />
+                </span>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-semibold text-ink">{{ asset.name }}</h3>
+                  <p class="text-xs text-muted">{{ asset.vendor }} {{ asset.model }}</p>
+                </div>
+                <app-status-badge [status]="assetStatus[asset.status]" />
+              </div>
+              <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div><dt class="text-xs text-muted">Adresse</dt><dd class="font-mono text-xs text-ink">{{ asset.ip ?? '–' }}</dd></div>
+                <div><dt class="text-xs text-muted">Garantie</dt><dd class="text-ink tabular-nums">{{ asset.warrantyUntil }}</dd></div>
+                <div class="col-span-2"><dt class="text-xs text-muted">Standort</dt><dd class="text-ink">{{ asset.location }}</dd></div>
+              </dl>
+              @if (asset.note) {
+                <p class="mt-2 border-t border-line pt-2 text-sm text-muted">{{ asset.note }}</p>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- ---------------------------------------------------------------- Netzwerk -->
+      @case ('netzwerk') {
+        @if (firstPlan(); as plan) {
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-ink">{{ siteName(plan.siteId) }}</h3>
+              <p class="text-xs text-muted">Zuletzt aktualisiert am {{ plan.updated }} von {{ plan.author }}</p>
+            </div>
+            <a
+              [routerLink]="['/netzwerk', plan.customerId, plan.siteId]"
+              class="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              Vollständiger Plan
+              <ng-icon name="phosphorArrowRight" size="16" />
+            </a>
+          </div>
+          <p class="mt-2 text-sm text-muted">{{ plan.summary }}</p>
+
+          <div class="mt-4">
+            <app-network-diagram [plan]="plan" [(selected)]="selectedNode" />
+          </div>
+
+          @if (selectedNodeData(); as node) {
+            <div class="mt-3 rounded-2xl bg-canvas p-4 ring-1 ring-line">
+              <h4 class="font-semibold text-ink">{{ node.label }}</h4>
+              <p class="text-sm text-muted">{{ node.sublabel }}</p>
+              @if (node.assetId) {
+                <p class="mt-2 text-sm">
+                  Im Inventar: <span class="font-medium text-ink">{{ assetName(node.assetId) }}</span>
+                </p>
+              }
+            </div>
+          }
+
+          @if (plans().length > 1) {
+            <ul class="mt-4 flex flex-wrap gap-2">
+              @for (other of plans(); track other.siteId) {
+                <li>
+                  <a
+                    [routerLink]="['/netzwerk', other.customerId, other.siteId]"
+                    class="inline-flex min-h-11 items-center gap-2 rounded-full bg-canvas px-4 text-sm font-medium text-ink ring-1 ring-line transition hover:ring-slate-300"
+                  >
+                    <ng-icon name="phosphorTreeStructure" size="16" class="text-slate-400" />
+                    {{ siteName(other.siteId) }}
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <app-empty-state
+            icon="phosphorTreeStructure"
+            title="Noch kein Netzwerkplan"
+            hint="Für diesen Kunden ist kein Plan hinterlegt. Bei der nächsten Bestandsaufnahme nachholen."
+          />
+        }
+      }
+
+      <!-- ---------------------------------------------------------------- Dokumentation -->
+      @case ('dokumentation') {
+        @if (docs().length === 0) {
+          <app-empty-state icon="phosphorBookOpen" title="Keine eigenen Dokumente" hint="Es gelten die allgemeinen Runbooks und Richtlinien." />
+        } @else {
+          <ul class="grid gap-3 md:grid-cols-2">
+            @for (doc of docs(); track doc.id) {
+              <li>
+                <a
+                  [routerLink]="['/dokumentation', doc.id]"
+                  class="group flex h-full items-start gap-3 rounded-2xl bg-canvas p-4 ring-1 ring-line transition hover:ring-slate-300"
+                >
+                  <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-canvas-alt text-slate-500">
+                    <ng-icon [name]="docCategory[doc.category].icon" size="18" />
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block font-semibold text-ink group-hover:text-primary-hover">{{ doc.title }}</span>
+                    <span class="mt-0.5 block text-sm text-muted">{{ doc.summary }}</span>
+                    <span class="mt-2 block text-xs text-slate-500">
+                      {{ docCategory[doc.category].label }} · aktualisiert am {{ doc.updated }} von {{ doc.author }}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+        <a routerLink="/dokumentation" class="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+          Allgemeine Runbooks und Richtlinien
+          <ng-icon name="phosphorArrowRight" size="16" />
+        </a>
+      }
+
+      <!-- ---------------------------------------------------------------- Tätigkeiten -->
+      @case ('taetigkeiten') {
+        <ul class="flex flex-col divide-y divide-line overflow-hidden rounded-2xl bg-canvas ring-1 ring-line">
+          @for (change of changes(); track change.id) {
+            <li>
+              <a
+                [routerLink]="['/taetigkeiten', change.id]"
+                class="group flex items-start gap-4 px-4 py-4 transition-colors hover:bg-canvas-alt/70 sm:px-5"
+              >
+                <span class="mt-0.5 hidden size-10 shrink-0 items-center justify-center rounded-xl bg-canvas-alt text-slate-500 sm:flex">
+                  <ng-icon [name]="changeType[change.type].icon" size="20" />
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="flex flex-wrap items-center gap-x-2 text-xs text-muted">
+                    <span class="font-semibold tabular-nums">{{ change.id }}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{{ changeType[change.type].label }}</span>
+                    <span aria-hidden="true">·</span>
+                    <span class="tabular-nums">{{ change.date }}</span>
+                  </span>
+                  <span class="mt-1 block font-semibold text-ink group-hover:text-primary-hover">{{ change.title }}</span>
+                  <span class="mt-1 block text-sm text-muted">{{ change.technician }}, {{ change.duration }} Stunden</span>
+                  <span class="mt-2.5 flex flex-wrap gap-2 md:hidden">
+                    <app-status-badge [status]="changeStatus[change.status]" />
+                    <app-status-badge [status]="changeRisk[change.risk]" />
+                  </span>
+                </span>
+                <span class="hidden shrink-0 flex-col items-end gap-2 md:flex">
+                  <app-status-badge [status]="changeStatus[change.status]" />
+                  <app-status-badge [status]="changeRisk[change.risk]" />
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- ---------------------------------------------------------------- Notfall -->
+      @case ('notfall') {
+        @if (emergency(); as plan) {
+          <div class="grid gap-5 lg:grid-cols-3">
+            <div class="flex min-w-0 flex-col gap-5 lg:col-span-2">
+              <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="kette-heading">
+                <h3 id="kette-heading" class="font-bold text-ink">Eskalationskette</h3>
+                <ol class="mt-4 flex flex-col gap-3">
+                  @for (step of plan.escalation; track step.level) {
+                    <li class="flex items-start gap-3">
+                      <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-night text-xs font-bold text-white">{{ step.level }}</span>
+                      <div class="min-w-0 flex-1">
+                        <p class="font-semibold text-ink">{{ step.name }}</p>
+                        <p class="text-sm text-muted">{{ step.role }}</p>
+                        <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                          <a [href]="tel(step.phone)" class="font-medium text-primary hover:underline">{{ step.phone }}</a>
+                          <span class="text-xs text-muted">{{ step.reachable }}</span>
+                        </p>
+                      </div>
+                    </li>
+                  }
+                </ol>
+              </section>
+
+              <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="szenarien-heading">
+                <h3 id="szenarien-heading" class="font-bold text-ink">Szenarien</h3>
+                <div class="mt-4 flex flex-col gap-4">
+                  @for (scenario of plan.scenarios; track scenario.id) {
+                    <article class="rounded-xl bg-canvas-alt p-4">
+                      <div class="flex flex-wrap items-start justify-between gap-2">
+                        <h4 class="font-semibold text-ink">{{ scenario.title }}</h4>
+                        <span class="text-xs" [class]="scenario.lastTested ? 'text-muted' : 'font-semibold text-amber-700'">
+                          {{ scenario.lastTested ? 'zuletzt getestet am ' + scenario.lastTested : 'noch nie getestet' }}
+                        </span>
+                      </div>
+                      <p class="mt-1 text-sm text-muted">{{ scenario.impact }}</p>
+                      <ol class="mt-3 flex list-decimal flex-col gap-1.5 pl-5 text-sm text-ink marker:text-slate-400">
+                        @for (step of scenario.steps; track step) {
+                          <li>{{ step }}</li>
+                        }
+                      </ol>
+                    </article>
+                  }
+                </div>
+              </section>
+            </div>
+
+            <div class="flex min-w-0 flex-col gap-5">
+              <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="ziele-heading">
+                <h3 id="ziele-heading" class="font-bold text-ink">Vereinbarte Ziele</h3>
+                <dl class="mt-3 flex flex-col gap-3 text-sm">
+                  <div>
+                    <dt class="text-xs text-muted">Wiederanlaufzeit (RTO)</dt>
+                    <dd class="font-medium text-ink">{{ plan.rto }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs text-muted">Maximaler Datenverlust (RPO)</dt>
+                    <dd class="font-medium text-ink">{{ plan.rpo }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs text-muted">Versicherung</dt>
+                    <dd class="text-ink">{{ plan.insurance }}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="backup-heading">
+                <h3 id="backup-heading" class="font-bold text-ink">Sicherungskette</h3>
+                <ul class="mt-3 flex flex-col gap-2 text-sm text-ink">
+                  @for (entry of plan.backupChain; track entry) {
+                    <li class="flex gap-2">
+                      <ng-icon name="phosphorCheck" size="15" class="mt-0.5 shrink-0 text-teal-600" />
+                      {{ entry }}
+                    </li>
+                  }
+                </ul>
+                <p class="mt-3 border-t border-line pt-3 text-sm">
+                  <span class="text-muted">Kopie außer Haus:</span> <span class="text-ink">{{ plan.offlineCopy }}</span>
+                </p>
+              </section>
+
+              <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line" aria-labelledby="reihenfolge-heading">
+                <h3 id="reihenfolge-heading" class="font-bold text-ink">Wiederanlauf in dieser Reihenfolge</h3>
+                <ol class="mt-3 flex list-decimal flex-col gap-1.5 pl-5 text-sm text-ink marker:font-semibold marker:text-slate-400">
+                  @for (entry of plan.restoreOrder; track entry) {
+                    <li>{{ entry }}</li>
+                  }
+                </ol>
+              </section>
+            </div>
+          </div>
+        } @else {
+          <app-empty-state icon="phosphorSiren" title="Kein Notfallplan hinterlegt" hint="Vor dem Regelbetrieb muss ein Notfallplan angelegt werden." />
+        }
+      }
+    }
+  </div>
+
+  <app-rotate-dialog [secret]="rotating()" [initial]="suggestion()" (saved)="saveRotation($event)" (closed)="rotating.set(null)" />
+} @else {
+  <app-empty-state icon="phosphorBuildings" title="Kunde nicht gefunden" hint="Der Link zeigt auf eine Akte, die es nicht gibt.">
+    <a
+      routerLink="/kunden"
+      class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+    >
+      Zur Kundenliste
+    </a>
+  </app-empty-state>
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Backup-Appliance">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="84" y="170" width="232" height="64" rx="12" fill="#fff"/>
+    <rect x="110" y="192" width="24" height="16" rx="2" fill="#dbeafe"/>
+    <rect x="144" y="192" width="24" height="16" rx="2" fill="#dbeafe"/>
+    <rect x="178" y="192" width="24" height="16" rx="2" fill="#dbeafe"/>
+    <rect x="212" y="192" width="24" height="16" rx="2" fill="#dbeafe"/>
+    <rect x="246" y="192" width="24" height="16" rx="2" fill="#dbeafe"/>
+    <path d="M200 60a60 60 0 1 1-56 82" stroke="#2563eb"/>
+    <path d="M132 118l12 26 26-12" stroke="#2563eb"/>
+    <circle cx="200" cy="102" r="13" fill="#1b9e8c" stroke="none"/>
+  </g>
+</svg>

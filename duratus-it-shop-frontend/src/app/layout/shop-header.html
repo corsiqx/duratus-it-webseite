@@ -1,0 +1,228 @@
+<!-- Main bar: logo, search, wish list, cart. The whole header sticks; the demo strip above it scrolls away. -->
+<div class="border-b border-line bg-canvas/95 backdrop-blur-xl">
+  <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-5 sm:px-6 lg:px-8">
+    <a routerLink="/" class="flex shrink-0 items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+      <app-brand-mark />
+      <span class="ml-2 hidden rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary sm:inline">Shop</span>
+      <span class="sr-only">Zur Startseite des Shops</span>
+    </a>
+
+    <!-- Search with suggestions. Enter opens the search page, arrow keys move through the list. -->
+    <div #searchBox class="relative hidden min-w-0 flex-1 md:block" (focusout)="onSearchFocusOut($event, searchBox)">
+      <label for="shop-search" class="sr-only">Artikel suchen</label>
+      <div class="flex items-center gap-2 rounded-full bg-canvas-alt px-4 ring-1 ring-line focus-within:ring-2 focus-within:ring-primary">
+        <ng-icon name="phosphorMagnifyingGlass" size="18" class="shrink-0 text-slate-400" />
+        <input
+          id="shop-search"
+          #searchInput
+          type="search"
+          autocomplete="off"
+          class="min-h-11 w-full min-w-0 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-slate-400"
+          placeholder="Artikel, Hersteller oder Artikelnummer suchen"
+          [value]="query()"
+          (input)="onQuery($event)"
+          (keydown)="onSearchKeydown($event)"
+        />
+        @if (query()) {
+          <button type="button" class="flex size-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:text-ink" (click)="clearQuery()">
+            <ng-icon name="phosphorX" size="14" />
+            <span class="sr-only">Suche leeren</span>
+          </button>
+        }
+      </div>
+
+      @if (suggestionsOpen()) {
+        <div class="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-2xl bg-canvas shadow-[0_24px_56px_-20px_rgb(15_23_42/0.35)] ring-1 ring-slate-900/[0.06] motion-safe:animate-fade-in">
+          @if (suggestions().length) {
+            <ul #suggestionList class="max-h-[22rem] overflow-y-auto p-1.5">
+              @for (product of suggestions(); track product.id) {
+                <li>
+                  <a
+                    [routerLink]="['/artikel', product.slug]"
+                    class="flex items-center gap-3 rounded-xl p-2 outline-none transition-colors hover:bg-canvas-alt focus-visible:bg-canvas-alt"
+                    (click)="closeSuggestions()"
+                  >
+                    <app-product-image
+                      [product]="product"
+                      prefer="thumb"
+                      class="size-12 shrink-0 overflow-hidden rounded-lg bg-canvas-alt p-1"
+                      imageClass="size-full object-contain"
+                    />
+                    <span class="min-w-0 flex-1">
+                      <span class="block truncate text-sm font-semibold text-ink">{{ product.name }}</span>
+                      <span class="block truncate text-xs text-muted">{{ product.manufacturer }} · {{ product.subtitle }}</span>
+                    </span>
+                    <span class="shrink-0 text-sm font-semibold text-ink tabular-nums">{{ priceText(product.price) }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+            <div class="border-t border-line p-1.5">
+              <a
+                [routerLink]="['/suche']"
+                [queryParams]="{ q: query() }"
+                class="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-primary transition-colors hover:bg-canvas-alt"
+                (click)="closeSuggestions()"
+              >
+                <ng-icon name="phosphorMagnifyingGlass" size="16" />
+                Alle {{ matchCount() }} Treffer für „{{ query() }}“ anzeigen
+              </a>
+            </div>
+          } @else {
+            <p class="px-4 py-5 text-sm text-muted">
+              Keine Treffer für „{{ query() }}“. Versuchen Sie einen Hersteller, eine Artikelnummer oder ein Stichwort wie „Backup“.
+            </p>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="ml-auto flex shrink-0 items-center gap-1">
+      <button
+        type="button"
+        class="flex size-11 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-canvas-alt hover:text-ink focus-visible:outline-2 focus-visible:outline-primary md:hidden"
+        (click)="mobileSearchOpen.update((open) => !open)"
+      >
+        <ng-icon [name]="mobileSearchOpen() ? 'phosphorX' : 'phosphorMagnifyingGlass'" size="20" />
+        <span class="sr-only">{{ mobileSearchOpen() ? 'Suche schließen' : 'Suche öffnen' }}</span>
+      </button>
+
+      <a
+        routerLink="/merkliste"
+        class="relative hidden size-11 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-canvas-alt hover:text-ink focus-visible:outline-2 focus-visible:outline-primary sm:flex"
+      >
+        <ng-icon name="phosphorBookmarkSimple" size="20" />
+        @if (store.wishlistIds().length) {
+          <span class="absolute top-1 right-1 min-w-4 rounded-full bg-slate-900 px-1 text-center text-[10px] leading-4 font-bold text-white tabular-nums">
+            {{ store.wishlistIds().length }}
+          </span>
+        }
+        <span class="sr-only">Merkliste, {{ store.wishlistIds().length }} Artikel</span>
+      </a>
+
+      <a
+        routerLink="/konto"
+        class="hidden size-11 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-canvas-alt hover:text-ink focus-visible:outline-2 focus-visible:outline-primary sm:flex"
+      >
+        <ng-icon name="phosphorUserCircle" size="20" />
+        <span class="sr-only">Mein Konto</span>
+      </a>
+
+      <a
+        routerLink="/warenkorb"
+        class="relative ml-1 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+      >
+        <ng-icon name="phosphorShoppingCartSimple" size="18" />
+        <span class="tabular-nums">{{ store.cartCount() }}</span>
+        <span class="hidden tabular-nums lg:inline">· {{ cartTotalText() }}</span>
+        <span class="sr-only">Warenkorb, {{ store.cartCount() }} Artikel</span>
+      </a>
+
+      <button
+        #menuTrigger
+        type="button"
+        class="flex size-11 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-canvas-alt hover:text-ink focus-visible:outline-2 focus-visible:outline-primary lg:hidden"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="shop-mobile-menu"
+        (click)="menuOpen.update((open) => !open)"
+      >
+        <ng-icon [name]="menuOpen() ? 'phosphorX' : 'phosphorList'" size="22" />
+        <span class="sr-only">{{ menuOpen() ? 'Menü schließen' : 'Menü öffnen' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Phone search: a row of its own so the logo and the cart keep their space. -->
+  @if (mobileSearchOpen()) {
+    <div class="border-t border-line px-4 py-3 md:hidden">
+      <form class="flex items-center gap-2 rounded-full bg-canvas-alt px-4 ring-1 ring-line focus-within:ring-2 focus-within:ring-primary" (submit)="submitMobileSearch($event)">
+        <ng-icon name="phosphorMagnifyingGlass" size="18" class="shrink-0 text-slate-400" />
+        <label for="shop-search-mobile" class="sr-only">Artikel suchen</label>
+        <input
+          id="shop-search-mobile"
+          #mobileSearchInput
+          type="search"
+          autocomplete="off"
+          class="min-h-11 w-full min-w-0 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-slate-400"
+          placeholder="Artikel oder Hersteller suchen"
+          [value]="query()"
+          (input)="onQuery($event)"
+        />
+      </form>
+    </div>
+  }
+
+  <!-- Category row. Scrolls sideways on phones. -->
+  <nav aria-label="Kategorien" class="border-t border-line">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <ul class="-mx-4 flex snap-x gap-1 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+        <li>
+          <a
+            routerLink="/katalog"
+            routerLinkActive
+            #allActive="routerLinkActive"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="flex min-h-10 snap-start items-center rounded-full px-3.5 text-sm font-medium whitespace-nowrap transition-colors"
+            [class]="allActive.isActive ? 'bg-primary-soft text-primary' : 'text-slate-600 hover:bg-canvas-alt hover:text-ink'"
+          >
+            Alle Artikel
+          </a>
+        </li>
+        @for (category of categories; track category.id) {
+          <li>
+            <a
+              [routerLink]="['/katalog', category.slug]"
+              routerLinkActive
+              #rla="routerLinkActive"
+              class="flex min-h-10 snap-start items-center gap-2 rounded-full px-3.5 text-sm font-medium whitespace-nowrap transition-colors"
+              [class]="rla.isActive ? 'bg-primary-soft text-primary' : 'text-slate-600 hover:bg-canvas-alt hover:text-ink'"
+            >
+              <ng-icon [name]="category.icon" size="16" class="opacity-70" />
+              {{ category.name }}
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Mobile menu: categories plus the account pages. -->
+  <div
+    id="shop-mobile-menu"
+    class="grid overflow-hidden border-t border-line bg-canvas transition-[grid-template-rows,opacity] duration-300 ease-out-expo lg:hidden"
+    [class]="menuOpen() ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'"
+    [attr.inert]="menuOpen() ? null : ''"
+  >
+    <div class="overflow-hidden">
+      <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+        <p class="px-2 pt-1 text-xs font-medium text-muted">Kategorien</p>
+        <ul class="mt-1 grid grid-cols-1 gap-0.5 sm:grid-cols-2">
+          @for (category of categories; track category.id) {
+            <li>
+              <a [routerLink]="['/katalog', category.slug]" class="flex min-h-12 items-center gap-3 rounded-2xl px-2 transition-colors hover:bg-canvas-alt">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                  <ng-icon [name]="category.icon" size="18" />
+                </span>
+                <span class="min-w-0">
+                  <span class="block text-sm font-semibold text-ink">{{ category.name }}</span>
+                  <span class="block truncate text-xs text-muted">{{ category.tagline }}</span>
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+        <div class="mx-2 my-2 h-px bg-line"></div>
+        <ul class="grid grid-cols-2 gap-0.5">
+          @for (link of accountNav; track link.path) {
+            <li>
+              <a [routerLink]="link.path" class="flex min-h-12 items-center gap-2 rounded-2xl px-2 text-sm font-semibold text-ink transition-colors hover:bg-canvas-alt">
+                <ng-icon [name]="link.icon" size="18" class="text-slate-400" />
+                {{ link.label }}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

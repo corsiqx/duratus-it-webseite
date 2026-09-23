@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Tischtelefon">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M110 232h180a10 10 0 0 0 10-10v-34H100v34a10 10 0 0 0 10 10Z" fill="#fff"/>
+    <rect x="128" y="94" width="144" height="94" rx="10" fill="#fff"/>
+    <rect x="144" y="110" width="112" height="34" rx="4" fill="#dbeafe" stroke="none"/>
+    <path d="M150 162h20M186 162h20M222 162h20" stroke="#2563eb" stroke-width="7"/>
+    <path d="M300 188v-24a22 22 0 0 0-22-22" stroke="#94a3b8"/>
+    <circle cx="200" cy="210" r="8" fill="#1b9e8c" stroke="none"/>
+  </g>
+</svg>

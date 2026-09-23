@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Gateway mit Verwaltung">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="132" y="138" width="136" height="86" rx="12" fill="#fff"/>
+    <rect x="150" y="156" width="100" height="26" rx="4" fill="#dbeafe" stroke="none"/>
+    <rect x="152" y="196" width="20" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="178" y="196" width="20" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="204" y="196" width="20" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="230" y="196" width="20" height="12" rx="2" fill="#dbeafe"/>
+    <circle cx="252" cy="202" r="5" fill="#1b9e8c" stroke="none"/>
+    <path d="M148 116a74 74 0 0 1 104 0" stroke="#2563eb"/>
+    <path d="M168 92h64" stroke="#2563eb"/>
+  </g>
+</svg>

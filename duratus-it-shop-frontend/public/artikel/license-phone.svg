@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Lizenz für die Telefonanlage">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="94" y="120" width="132" height="116" rx="10" fill="#fff"/>
+    <path d="M118 152h84M118 178h84M118 204h52" stroke="#2563eb" stroke-width="6"/>
+    <path d="M258 168v-14a46 46 0 0 1 92 0v14" fill="none" stroke="#0d1f3c"/>
+    <rect x="244" y="162" width="30" height="50" rx="12" fill="#fff"/>
+    <rect x="334" y="162" width="30" height="50" rx="12" fill="#fff"/>
+    <path d="M334 206c-16 0-22 14-36 14" stroke="#2563eb"/>
+    <circle cx="292" cy="220" r="8" fill="#2563eb" stroke="none"/>
+  </g>
+</svg>

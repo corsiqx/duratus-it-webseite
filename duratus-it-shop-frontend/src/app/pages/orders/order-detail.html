@@ -1,0 +1,229 @@
+@if (order(); as item) {
+  <app-page-hero
+    [crumbs]="crumbs()"
+    [title]="(item.kind === 'angebot' ? 'Angebot ' : 'Bestellung ') + item.id"
+    [lead]="lead()"
+  >
+    <div class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-white transition hover:bg-blue-500"
+        [disabled]="pdfBusy()"
+        (click)="downloadPdf(item)"
+      >
+        @if (pdfBusy()) {
+          <ng-icon name="phosphorCircleNotch" size="16" class="animate-spin" />
+        } @else {
+          <ng-icon name="phosphorFilePdf" size="16" />
+        }
+        {{ item.kind === 'angebot' ? 'Angebot als PDF' : 'Bestätigung als PDF' }}
+      </button>
+      <button
+        type="button"
+        class="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+        (click)="reorder(item)"
+      >
+        <ng-icon name="phosphorArrowsClockwise" size="16" />
+        Erneut bestellen
+      </button>
+    </div>
+  </app-page-hero>
+
+  <div class="bg-canvas-alt py-8 sm:py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <!-- Confirmation banner right after submitting. -->
+      @if (isNew()) {
+        <div class="mb-6 flex flex-col gap-4 rounded-2xl bg-canvas p-5 ring-1 ring-teal-600/25 sm:flex-row sm:items-center sm:p-6" role="status" aria-live="polite">
+          <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-teal-50 text-teal-700">
+            <ng-icon name="phosphorCheckCircle" size="26" />
+          </span>
+          <div class="min-w-0 flex-1">
+            <h2 class="text-lg font-bold text-ink">
+              {{ item.kind === 'angebot' ? 'Angebot erstellt.' : 'Bestellung eingegangen.' }}
+            </h2>
+            <p class="mt-1 text-sm leading-relaxed text-muted">
+              @if (item.kind === 'angebot') {
+                Das Angebot ist bis zum {{ item.validUntil }} gültig. Wir schicken es zusätzlich an
+                {{ item.address.email }} und melden uns bei Rückfragen.
+              } @else {
+                Die Bestätigung geht an {{ item.address.email }}. Jedes Gerät wird als Onboarding-Vorgang im
+                Service-System angelegt, damit es nach der Lieferung betreut wird.
+              }
+            </p>
+          </div>
+        </div>
+      }
+
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+        <div class="min-w-0 lg:col-span-8">
+          <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6" aria-labelledby="positions-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="positions-heading" class="text-lg font-bold text-ink">Positionen</h2>
+              <app-status-badge [status]="status()" />
+            </div>
+
+            <!-- Table from md upwards, cards on phones. -->
+            <div class="mt-4 hidden md:block">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-line text-left text-xs tracking-wide text-muted uppercase">
+                    <th scope="col" class="py-2 pr-3 font-semibold">Artikel</th>
+                    <th scope="col" class="px-3 py-2 font-semibold">Artikelnummer</th>
+                    <th scope="col" class="px-3 py-2 text-right font-semibold">Menge</th>
+                    <th scope="col" class="px-3 py-2 text-right font-semibold">Einzelpreis</th>
+                    <th scope="col" class="px-3 py-2 text-right font-semibold">Gesamt</th>
+                    <th scope="col" class="py-2 pl-3 text-right font-semibold">Termin</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                  @for (line of item.lines; track line.productId) {
+                    <tr>
+                      <td class="py-3 pr-3">
+                        <a [routerLink]="['/artikel', line.slug]" class="font-semibold text-ink transition-colors hover:text-primary">{{ line.name }}</a>
+                        <span class="block text-xs text-muted">{{ line.subtitle }}</span>
+                      </td>
+                      <td class="px-3 py-3 font-mono text-xs text-muted">{{ line.mpn }}</td>
+                      <td class="px-3 py-3 text-right tabular-nums">{{ line.quantity }}</td>
+                      <td class="px-3 py-3 text-right tabular-nums">{{ euroCents(line.unitPrice) }}</td>
+                      <td class="px-3 py-3 text-right font-semibold tabular-nums">{{ euroCents(line.lineTotal) }}</td>
+                      <td class="py-3 pl-3 text-right text-muted">{{ line.deliveryDate }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <ul class="mt-4 flex flex-col gap-3 md:hidden">
+              @for (line of item.lines; track line.productId) {
+                <li class="rounded-xl bg-canvas-alt p-3">
+                  <a [routerLink]="['/artikel', line.slug]" class="font-semibold text-ink">{{ line.name }}</a>
+                  <p class="text-xs text-muted">{{ line.subtitle }}</p>
+                  <p class="mt-1 font-mono text-xs text-slate-400">{{ line.mpn }}</p>
+                  <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                    <dt class="text-muted">Menge</dt>
+                    <dd class="text-right tabular-nums">{{ line.quantity }}</dd>
+                    <dt class="text-muted">Einzelpreis</dt>
+                    <dd class="text-right tabular-nums">{{ euroCents(line.unitPrice) }}</dd>
+                    <dt class="text-muted">Gesamt</dt>
+                    <dd class="text-right font-semibold tabular-nums">{{ euroCents(line.lineTotal) }}</dd>
+                    <dt class="text-muted">Termin</dt>
+                    <dd class="text-right">{{ line.deliveryDate }}</dd>
+                  </dl>
+                </li>
+              }
+            </ul>
+          </section>
+
+          <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line">
+              <h2 class="font-bold text-ink">Lieferadresse</h2>
+              <address class="mt-3 text-sm leading-relaxed text-muted not-italic">
+                <span class="block font-semibold text-ink">{{ item.address.company }}</span>
+                {{ item.address.contact }}<br />
+                @if (item.address.department) {
+                  {{ item.address.department }}<br />
+                }
+                {{ item.address.street }}<br />
+                {{ item.address.zip }} {{ item.address.city }}<br />
+                {{ item.address.email }}<br />
+                {{ item.address.phone }}
+              </address>
+            </section>
+
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line">
+              <h2 class="font-bold text-ink">Rechnungsadresse</h2>
+              <address class="mt-3 text-sm leading-relaxed text-muted not-italic">
+                <span class="block font-semibold text-ink">{{ item.billing.company }}</span>
+                {{ item.billing.street }}<br />
+                {{ item.billing.zip }} {{ item.billing.city }}<br />
+                {{ item.billing.email }}
+              </address>
+            </section>
+          </div>
+
+          @if (item.note) {
+            <section class="mt-4 rounded-2xl bg-canvas p-5 ring-1 ring-line">
+              <h2 class="font-bold text-ink">Ihr Hinweis</h2>
+              <p class="mt-2 leading-relaxed text-muted">{{ item.note }}</p>
+            </section>
+          }
+
+          <a routerLink="/bestellungen" class="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover">
+            <ng-icon name="phosphorArrowLeft" size="16" />
+            Alle Vorgänge
+          </a>
+        </div>
+
+        <aside class="lg:col-span-4">
+          <div class="flex flex-col gap-4">
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line">
+              <h2 class="text-lg font-bold text-ink">Summen</h2>
+              <dl class="mt-4 flex flex-col gap-2 text-sm">
+                <div class="flex items-baseline justify-between gap-4">
+                  <dt class="text-muted">Warenwert (netto)</dt>
+                  <dd class="font-semibold text-ink tabular-nums">{{ euroCents(item.goodsNet) }}</dd>
+                </div>
+                <div class="flex items-baseline justify-between gap-4">
+                  <dt class="text-muted">Versand</dt>
+                  <dd class="font-semibold text-ink tabular-nums">{{ item.shippingNet === 0 ? 'kostenfrei' : euroCents(item.shippingNet) }}</dd>
+                </div>
+                <div class="flex items-baseline justify-between gap-4">
+                  <dt class="text-muted">19 % MwSt.</dt>
+                  <dd class="font-semibold text-ink tabular-nums">{{ euroCents(item.vat) }}</dd>
+                </div>
+                <div class="mt-1 flex items-baseline justify-between gap-4 border-t border-line pt-3">
+                  <dt class="font-bold text-ink">Gesamt (brutto)</dt>
+                  <dd class="text-xl font-bold text-ink tabular-nums">{{ euroCents(item.gross) }}</dd>
+                </div>
+                @if (item.monthlyNet > 0) {
+                  <div class="mt-2 flex items-baseline justify-between gap-4 rounded-lg bg-primary-soft px-3 py-2">
+                    <dt class="font-semibold text-primary">zusätzlich monatlich (netto)</dt>
+                    <dd class="font-bold text-primary tabular-nums">{{ euroCents(item.monthlyNet) }}</dd>
+                  </div>
+                }
+              </dl>
+            </section>
+
+            <section class="rounded-2xl bg-canvas p-5 ring-1 ring-line">
+              <h2 class="text-sm font-semibold text-ink">Vorgangsdaten</h2>
+              <dl class="mt-3 flex flex-col gap-2 text-sm">
+                @for (row of metaRows(); track row.label) {
+                  <div class="flex items-baseline justify-between gap-4">
+                    <dt class="text-muted">{{ row.label }}</dt>
+                    <dd class="text-right font-medium text-ink">{{ row.value }}</dd>
+                  </div>
+                }
+              </dl>
+            </section>
+
+            <section class="rounded-2xl bg-night p-5 text-slate-300">
+              <h2 class="font-bold text-white">Weiter im Kundenportal</h2>
+              <p class="mt-2 text-sm leading-relaxed">
+                Lieferscheine, Rechnungen und Arbeitsnachweise liegen im Kundenportal. Dort sehen Sie auch die Geräte,
+                die aus dieser Bestellung in den Betrieb übergegangen sind.
+              </p>
+              <a
+                [href]="website.portal"
+                class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+              >
+                Kundenportal öffnen
+                <ng-icon name="phosphorArrowUpRight" size="13" class="opacity-70" />
+              </a>
+            </section>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="bg-canvas-alt py-20">
+    <div class="mx-auto max-w-2xl px-4 sm:px-6">
+      <app-empty-state icon="phosphorPackage" title="Diesen Vorgang gibt es nicht" hint="Bestellungen und Angebote liegen nur in diesem Browser. Nach dem Zurücksetzen der Demodaten sind sie weg.">
+        <a routerLink="/bestellungen" class="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover">
+          Alle Vorgänge
+          <ng-icon name="phosphorArrowRight" size="16" />
+        </a>
+      </app-empty-state>
+    </div>
+  </div>
+}

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Switch mit 24 Anschlüssen und PoE">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="52" y="112" width="296" height="92" rx="10" fill="#fff"/>
+    <path d="M70 128l-8 12h7l-2 11 10-14h-7Z" fill="#1b9e8c" stroke="none"/>
+    <path d="M86 134h44" stroke="#1b9e8c" stroke-width="4"/>
+    <rect x="70" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="93" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="116" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="139" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="162" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="185" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="208" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="231" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="254" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="277" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="300" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="323" y="148" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="70" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="93" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="116" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="139" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="162" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="185" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="208" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="231" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="254" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="277" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="300" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <rect x="323" y="176" width="18" height="12" rx="2" fill="#dbeafe"/>
+    <circle cx="328" cy="154" r="5" fill="#1b9e8c" stroke="none"/>
+    <circle cx="328" cy="182" r="5" fill="#2563eb" stroke="none"/>
+    <path d="M52 132h-14v52h14M348 132h14v52h-14" stroke="#94a3b8"/>
+    <path d="M62 204v14M338 204v14" stroke="#94a3b8"/>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Tastatur und Maus">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <circle cx="200" cy="148" r="108" fill="#eff6ff"/>
+  <g fill="none" stroke="#0d1f3c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="66" y="152" width="200" height="82" rx="12" fill="#fff"/>
+    <path d="M84 172h28M124 172h28M164 172h28M204 172h28M84 194h28M124 194h68M204 194h28M104 216h124" stroke="#2563eb" stroke-width="7"/>
+    <path d="M300 152c16 0 26 14 26 34s-10 34-26 34-26-14-26-34 10-34 26-34Z" fill="#fff"/>
+    <path d="M300 152v28" stroke="#94a3b8"/>
+  </g>
+</svg>

@@ -1,0 +1,356 @@
+<!-- Hero: what the shop is, and the two ways in (browse or search). -->
+<section class="relative isolate overflow-hidden bg-night pt-12 pb-14 sm:pt-16 sm:pb-20" aria-labelledby="hero-heading">
+  <div
+    class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgb(255_255_255/0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgb(255_255_255/0.05)_1px,transparent_1px)] bg-size-[64px_64px] mask-radial-at-top-right mask-radial-from-0% mask-radial-to-75%"
+    aria-hidden="true"
+  ></div>
+  <div class="absolute -top-80 -right-52 -z-10 size-[54rem] rounded-full bg-radial from-primary/30 to-transparent to-70%" aria-hidden="true"></div>
+
+  <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:px-8">
+    <div class="min-w-0 lg:col-span-7">
+      <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-slate-200">
+        <ng-icon name="phosphorBuildings" size="14" class="text-primary-on-night" />
+        Firmenkundenshop · Nettopreise · Kauf auf Rechnung
+      </p>
+      <h1 id="hero-heading" class="mt-5 text-4xl leading-[1.08] font-bold tracking-tight text-balance text-white sm:text-5xl lg:text-6xl">
+        Hardware bestellen. <span class="text-primary-on-night">Betrieb gleich mitdenken.</span>
+      </h1>
+      <p class="mt-6 max-w-[58ch] text-lg leading-relaxed text-pretty text-slate-300">
+        Arbeitsplätze, Netzwerk, Sicherheit, Server und Lizenzen. Jeder Artikel zeigt, welche Managed-Service-Linie den
+        Betrieb übernimmt, damit ein Gerät nach der Lieferung nicht ungepflegt im Netz landet.
+      </p>
+
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a
+          routerLink="/katalog"
+          class="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-white transition hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-on-night active:scale-[0.98]"
+        >
+          Katalog ansehen
+          <ng-icon name="phosphorArrowRight" size="16" class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" />
+        </a>
+        <a
+          [href]="website.configurator"
+          class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white/10 px-6 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-on-night"
+        >
+          Managed Service konfigurieren
+          <ng-icon name="phosphorArrowUpRight" size="14" class="opacity-70" />
+        </a>
+      </div>
+
+      <dl class="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+        @for (fact of heroFacts; track fact.label) {
+          <div>
+            <dt class="text-xs text-slate-400">{{ fact.label }}</dt>
+            <dd class="mt-1 text-lg font-bold text-white tabular-nums">{{ fact.value }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+
+    <!-- Right column: the three most requested categories as a quick entry. -->
+    <div class="min-w-0 lg:col-span-5">
+      <div class="rounded-2xl bg-white/[0.04] p-4 ring-1 ring-white/10 sm:p-5">
+        <p class="text-xs font-semibold tracking-wide text-slate-400 uppercase">Häufig bestellt</p>
+        <ul class="mt-3 flex flex-col gap-2">
+          @for (product of quickPicks; track product.id) {
+            <li>
+              <a
+                [routerLink]="['/artikel', product.slug]"
+                class="group flex items-center gap-3 rounded-xl bg-white/[0.03] p-2.5 transition-colors hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-primary-on-night"
+              >
+                <app-product-image
+                  [product]="product"
+                  prefer="thumb"
+                  [eager]="true"
+                  class="size-14 shrink-0 overflow-hidden rounded-lg bg-white p-1"
+                  imageClass="size-full object-contain"
+                />
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-semibold text-white">{{ product.name }}</span>
+                  <span class="block truncate text-xs text-slate-400">{{ product.subtitle }}</span>
+                </span>
+                <span class="shrink-0 text-right">
+                  <span class="block text-sm font-bold text-white tabular-nums">{{ priceText(product.price) }}</span>
+                  <span class="block text-[11px] text-slate-400">{{ unitLabel(product) }}</span>
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+        <a
+          routerLink="/katalog"
+          class="mt-3 flex min-h-11 items-center justify-center gap-1.5 rounded-full text-sm font-semibold text-primary-on-night transition-colors hover:text-white"
+        >
+          Alle {{ productCount }} Artikel
+          <ng-icon name="phosphorArrowRight" size="14" />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="bg-canvas py-14 sm:py-20" aria-labelledby="categories-heading">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id="categories-heading" class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Kategorien</h2>
+        <p class="mt-2 max-w-[52ch] text-muted">Sieben Bereiche, die zusammen einen Standort ausstatten.</p>
+      </div>
+      <a routerLink="/katalog" class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-hover">
+        Alle Artikel
+        <ng-icon name="phosphorArrowRight" size="14" />
+      </a>
+    </div>
+
+    <ul class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (category of categories; track category.id; let i = $index) {
+        <li appReveal [revealDelay]="i % 4" [class]="i === 0 ? 'sm:col-span-2 lg:row-span-2' : ''">
+          <a
+            [routerLink]="['/katalog', category.slug]"
+            class="group flex h-full flex-col overflow-hidden rounded-2xl bg-canvas ring-1 ring-line transition-shadow duration-300 ease-out-expo hover:shadow-[0_18px_40px_-20px_rgb(15_23_42/0.25)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <div class="relative overflow-hidden bg-canvas-alt" [class]="i === 0 ? 'aspect-[16/9] lg:aspect-[16/10]' : 'aspect-[16/9]'">
+              <img
+                [src]="'artikel/' + category.art + '.svg'"
+                alt=""
+                class="size-full object-cover transition-transform duration-500 ease-out-expo group-hover:scale-[1.04] motion-reduce:transition-none"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="flex flex-1 flex-col p-5">
+              <span class="flex size-10 items-center justify-center rounded-full bg-primary-soft text-primary">
+                <ng-icon [name]="category.icon" size="20" />
+              </span>
+              <h3 class="mt-4 text-lg font-bold text-ink transition-colors group-hover:text-primary">{{ category.name }}</h3>
+              <p class="mt-1 text-sm text-muted">{{ category.tagline }}</p>
+              @if (i === 0) {
+                <p class="mt-3 text-sm leading-relaxed text-muted">{{ category.text }}</p>
+              }
+              <p class="mt-4 flex items-center gap-1.5 text-sm font-semibold text-primary">
+                {{ counts[category.id] }} Artikel
+                <ng-icon
+                  name="phosphorArrowRight"
+                  size="14"
+                  class="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5"
+                />
+              </p>
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Why order here -->
+<section class="bg-canvas-alt py-14 sm:py-20" aria-labelledby="benefits-heading">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <h2 id="benefits-heading" class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Warum hier bestellen</h2>
+    <ul class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (benefit of benefits; track benefit.title; let i = $index) {
+        <li appReveal [revealDelay]="i" class="flex h-full flex-col rounded-2xl bg-canvas p-5 ring-1 ring-line">
+          <span class="flex size-10 items-center justify-center rounded-full bg-primary-soft text-primary">
+            <ng-icon [name]="benefit.icon" size="20" />
+          </span>
+          <h3 class="mt-4 font-bold text-ink">{{ benefit.title }}</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-muted">{{ benefit.text }}</p>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Recommended articles -->
+<section class="bg-canvas py-14 sm:py-20" aria-labelledby="picks-heading">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id="picks-heading" class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Empfohlen für den Rollout</h2>
+        <p class="mt-2 max-w-[52ch] text-muted">Die Artikel, die in unseren Projekten am häufigsten ausgeliefert werden.</p>
+      </div>
+      <a routerLink="/katalog" class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-hover">
+        Mehr sehen
+        <ng-icon name="phosphorArrowRight" size="14" />
+      </a>
+    </div>
+    <ul class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (product of recommended; track product.id; let i = $index) {
+        <li appReveal [revealDelay]="i % 4"><app-product-card [product]="product" /></li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Prepared sets -->
+<section class="bg-canvas-alt py-14 sm:py-20" aria-labelledby="bundles-heading">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[58ch]">
+      <h2 id="bundles-heading" class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Fertige Zusammenstellungen</h2>
+      <p class="mt-2 text-muted">
+        Ein Klick legt das ganze Set in den Warenkorb. Mengen lassen sich danach frei anpassen.
+      </p>
+    </div>
+
+    <ul class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+      @for (bundle of bundles; track bundle.id; let i = $index) {
+        <li appReveal [revealDelay]="i" class="flex h-full flex-col rounded-2xl bg-canvas p-5 ring-1 ring-line sm:p-6">
+          <div class="flex items-start justify-between gap-3">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+              <ng-icon [name]="bundle.icon" size="22" />
+            </span>
+            <span class="rounded-full bg-canvas-alt px-2.5 py-1 text-xs font-semibold text-muted">{{ bundle.serviceHint }}</span>
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-ink">{{ bundle.name }}</h3>
+          <p class="text-sm text-primary">{{ bundle.audience }}</p>
+          <p class="mt-3 text-sm leading-relaxed text-muted">{{ bundle.text }}</p>
+
+          <ul class="mt-4 flex flex-col gap-1.5 border-t border-line pt-4 text-sm">
+            @for (item of bundleLines(bundle); track item.slug) {
+              <li class="flex items-baseline justify-between gap-3">
+                <span class="min-w-0 text-muted">
+                  <span class="font-semibold text-ink tabular-nums">{{ item.quantity }} ×</span>
+                  {{ item.name }}
+                </span>
+                <span class="shrink-0 text-ink tabular-nums">{{ priceText(item.lineNet) }}</span>
+              </li>
+            }
+          </ul>
+
+          <div class="mt-5 flex items-end justify-between gap-3 border-t border-line pt-4">
+            <div>
+              <p class="text-xs text-muted">Summe des Sets</p>
+              <p class="text-xl font-bold text-ink tabular-nums">{{ priceText(bundleTotal(bundle)) }}</p>
+              <p class="text-xs text-muted">{{ taxNote() }}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+            (click)="addBundle(bundle)"
+          >
+            <ng-icon name="phosphorShoppingCartSimple" size="18" />
+            Set in den Warenkorb
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Vendors -->
+<section class="bg-canvas py-14 sm:py-16" aria-labelledby="vendors-heading">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <h2 id="vendors-heading" class="text-center text-sm font-semibold tracking-wide text-muted uppercase">
+      Wir beziehen über zertifizierte Distributoren dieser Hersteller
+    </h2>
+
+    <!-- Raster mit sichtbaren Trennlinien; die letzte Zelle führt in den Katalog. -->
+    <ul class="mt-8 grid grid-cols-2 overflow-hidden rounded-2xl ring-1 ring-line sm:grid-cols-3 lg:grid-cols-6">
+      @for (vendor of vendors; track vendor.id) {
+        <li class="flex min-h-28 flex-col items-center justify-center gap-2 border-b border-r border-line p-5">
+          <img
+            [src]="vendor.logo"
+            [alt]="vendor.name"
+            [class]="vendor.stripHeight + ' w-auto max-w-full object-contain opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0'"
+            loading="lazy"
+          />
+          @if (vendor.showName) {
+            <span class="text-xs text-muted">{{ vendor.name }}</span>
+          }
+        </li>
+      }
+      <li class="flex min-h-28 items-center justify-center border-b border-r border-line bg-primary-soft p-5">
+        <a routerLink="/katalog" class="text-center text-sm font-semibold text-primary hover:text-primary-hover">
+          und weitere auf Anfrage
+        </a>
+      </li>
+    </ul>
+
+    <p class="mt-6 text-center text-xs text-slate-400">
+      <!-- TODO: Markenrechtliche Freigabe der Herstellerlogos vor Veröffentlichung klären. -->
+      Marken und Logos sind Eigentum der jeweiligen Hersteller. Produktdaten und Fotos kommen über Icecat.
+    </p>
+  </div>
+</section>
+
+<!-- Cross-sell to the managed services -->
+<section class="bg-night py-14 sm:py-20" aria-labelledby="service-heading">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+      <div class="lg:col-span-5">
+        <h2 id="service-heading" class="text-2xl font-bold tracking-tight text-balance text-white sm:text-3xl">
+          Ein Gerät ohne Betrieb ist nur ein Karton.
+        </h2>
+        <p class="mt-4 text-slate-300">
+          Deshalb steht bei jedem Artikel, welche Managed-Service-Linie ihn übernimmt. Sie können Hardware auch ohne
+          Service bestellen, wir sagen dann nur, was wir dazu denken.
+        </p>
+        <a
+          [href]="website.managedServices"
+          class="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-white/10 px-5 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+        >
+          Managed Services ansehen
+          <ng-icon name="phosphorArrowUpRight" size="14" class="opacity-70" />
+        </a>
+      </div>
+      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-7">
+        @for (line of serviceLines; track line.anchor) {
+          <li class="rounded-2xl bg-white/[0.04] p-4 ring-1 ring-white/10">
+            <h3 class="flex items-center gap-2 font-semibold text-white">
+              <ng-icon name="phosphorGearSix" size="16" class="text-primary-on-night" />
+              {{ line.label }}
+            </h3>
+            <p class="mt-1.5 text-sm leading-relaxed text-slate-400">{{ line.text }}</p>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Recently viewed -->
+@if (store.recent().length > 1) {
+  <section class="bg-canvas py-14 sm:py-16" aria-labelledby="recent-heading">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 id="recent-heading" class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Zuletzt angesehen</h2>
+      <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        @for (product of store.recent().slice(0, 4); track product.id) {
+          <li><app-product-card [product]="product" /></li>
+        }
+      </ul>
+    </div>
+  </section>
+}
+
+<!-- Help -->
+<section class="bg-canvas-alt py-14 sm:py-20">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-6 rounded-2xl bg-canvas p-6 ring-1 ring-line sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+      <div class="max-w-[58ch]">
+        <h2 class="text-xl font-bold tracking-tight text-ink sm:text-2xl">Nicht gefunden, was gebraucht wird?</h2>
+        <p class="mt-2 text-muted">
+          Der Katalog zeigt einen Auszug. Schreiben Sie uns, was gesucht wird, dann kommt ein Angebot aus den aktuellen
+          Preislisten der Distributoren, inklusive Bestand und Lieferzeit.
+        </p>
+      </div>
+      <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
+        <a
+          [href]="'mailto:' + company.shopEmail"
+          class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+        >
+          <ng-icon name="phosphorEnvelopeSimple" size="16" />
+          {{ company.shopEmail }}
+        </a>
+        <a
+          [href]="company.phoneHref"
+          class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-canvas px-5 text-sm font-semibold text-ink ring-1 ring-line transition hover:bg-canvas-alt"
+        >
+          <ng-icon name="phosphorPhone" size="16" />
+          {{ company.phone }}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
